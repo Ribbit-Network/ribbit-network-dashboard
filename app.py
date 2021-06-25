@@ -4,6 +4,7 @@ import dash
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Output, Input
 import plotly.express as px
 
 from influxdb_client import InfluxDBClient, Point, Dialect
@@ -18,27 +19,44 @@ server = app.server
 client = InfluxDBClient.from_config_file("influx_config.ini")
 query_api = client.query_api()
 
+
+def get_influxdb_data():
+    ## Query data as pandas dataframe
+    data_frame = query_api.query_data_frame('from(bucket:"co2") '
+                                            '|> range(start: -24h) '
+                                            '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
+                                            '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
+
+    return data_frame
+
+def serve_layout():
+    #Define this function to query new data on page load
+    return html.Div([
+        dcc.Graph(
+            id='co2_graph',
+            figure=fig
+        ),
+        dcc.Interval(
+            id='interval-component',
+            interval=60*1000, # in milliseconds
+            n_intervals=0
+        )
+    ])
+
 ## Query data as pandas dataframe
-data_frame = query_api.query_data_frame('from(bucket:"co2") '
-                                        '|> range(start: -10m) '
-                                        '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
-                                        '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
+fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
 
 
-fig = px.line(data_frame, x="_time", y="co2", title="Co2 PPM")
+app.layout = serve_layout
 
-
-app.layout = html.Div([
-    dcc.Graph(
-        id='life-exp-vs-gdp',
-        figure=fig
-    ),
-    dash_table.DataTable(
-        id='table',
-        columns=[{"name": i, "id": i} for i in data_frame.columns],
-        data=data_frame.to_dict('records')
-    )
-])
+# update temperature graph
+@app.callback(Output('co2_graph', 'figure'),
+              [Input('interval-component', 'n_intervals')
+              ])
+def update_graph(n):
+    ## Query data as pandas dataframe
+    fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
+    return fig
 
 if __name__ == '__main__':
     app.run_server(debug=True)
