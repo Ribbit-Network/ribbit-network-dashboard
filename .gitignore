@@ -128,4 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# OSX Files
 .DS_Store
+
+# Influx DB Config
+influx_config.ini
