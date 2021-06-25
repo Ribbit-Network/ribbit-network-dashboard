@@ -12,7 +12,7 @@ from influxdb_client import InfluxDBClient, Point, Dialect
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 # Dash App
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, title='GHG Cloud', external_stylesheets=external_stylesheets)
 server = app.server
 
 # Connect to InfluxDB
