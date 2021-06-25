@@ -6,6 +6,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Output, Input
 import plotly.express as px
+import plotly.graph_objects as go
 
 from influxdb_client import InfluxDBClient, Point, Dialect
 
@@ -33,6 +34,12 @@ def serve_layout():
     #Define this function to query new data on page load
     return html.Div([
         dcc.Graph(
+            id='co2_globe',
+            figure=globe_fig,
+            style={
+            "width": "100%"
+        }),
+        dcc.Graph(
             id='co2_graph',
             figure=fig
         ),
@@ -46,6 +53,17 @@ def serve_layout():
 ## Query data as pandas dataframe
 fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
 
+# Build Map
+map_df = get_influxdb_data()
+globe_fig =go.Figure(data=go.Scattergeo(
+    lon = map_df['lon'],
+    lat = map_df['lat'],
+    text = map_df['co2'],
+    mode = 'markers'
+    ))
+#globe_fig.update_geos(projection_type="orthographic")
+globe_fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
+globe_fig.update_geos(lataxis_showgrid=True, lonaxis_showgrid=True)
 
 app.layout = serve_layout
 
