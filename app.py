@@ -53,17 +53,31 @@ def serve_layout():
 ## Query data as pandas dataframe
 fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
 
-# Build Map
-map_df = get_influxdb_data()
+# Only get the latest point for displaying on the map
+map_df = query_api.query_data_frame('from(bucket:"co2") '
+                                    '|> range(start:-15m) '
+                                    '|> limit(n:1) '
+                                    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
+                                    '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
+
 globe_fig =go.Figure(data=go.Scattergeo(
     lon = map_df['lon'],
     lat = map_df['lat'],
     text = map_df['co2'],
-    mode = 'markers'
+    mode = 'markers',
+    marker=dict(color="crimson", size=25,)
     ))
-#globe_fig.update_geos(projection_type="orthographic")
+globe_fig.update_geos(
+    projection_type="orthographic",
+    landcolor="white",
+    oceancolor="MidnightBlue",
+    showocean=True,
+    lakecolor="LightBlue",
+    lataxis_showgrid=True,
+    lonaxis_showgrid=True,
+    projection_rotation=dict(lon=-122, lat=25, roll=0)
+)
 globe_fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
-globe_fig.update_geos(lataxis_showgrid=True, lonaxis_showgrid=True)
 
 app.layout = serve_layout
 
