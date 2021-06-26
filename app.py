@@ -33,21 +33,30 @@ def get_influxdb_data():
 def serve_layout():
     #Define this function to query new data on page load
     return html.Div([
-        dcc.Graph(
-            id='co2_globe',
-            figure=globe_fig,
-            style={
-            "width": "100%"
-        }),
-        dcc.Graph(
-            id='co2_graph',
-            figure=fig
-        ),
-        dcc.Interval(
-            id='interval-component',
-            interval=60*1000, # in milliseconds
-            n_intervals=0
-        )
+        html.H1("CO2 PPM Database"),
+        html.Div([
+            html.Div([
+                html.H3('Sensor Map'),
+                dcc.Graph(
+                    id='co2_globe',
+                    figure=globe_fig,
+                    style={
+                    "width": "100%",
+                    'display': 'inline-block'
+                }),
+            ], className="six columns"),
+            html.Div([
+                html.H3('Sensor Data'),
+                dcc.Graph(
+                    id='co2_graph',
+                    figure=fig)
+            ], className="six columns"),
+            dcc.Interval(
+                id='interval-component',
+                interval=60*1000, # in milliseconds
+                n_intervals=0
+            )
+        ], className="row")
     ])
 
 ## Query data as pandas dataframe
@@ -80,6 +89,9 @@ globe_fig.update_geos(
 globe_fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
 
 app.layout = serve_layout
+app.css.append_css({
+    'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
+})
 
 # update temperature graph
 @app.callback(Output('co2_graph', 'figure'),
