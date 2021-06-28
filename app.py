@@ -24,7 +24,7 @@ query_api = client.query_api()
 def get_influxdb_data():
     ## Query data as pandas dataframe
     data_frame = query_api.query_data_frame('from(bucket:"co2") '
-                                            '|> range(start: -60m) '
+                                            '|> range(start: -1h) '
                                             '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                             '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
 
@@ -56,7 +56,12 @@ def serve_layout():
                 interval=60*1000, # in milliseconds
                 n_intervals=0
             )
-        ], className="row")
+        ], className="row"),
+        html.A(html.Button('Learn More!'),
+            href='https://github.com/keenanjohnson/ghg-gas-cloud',
+            style={
+                    "align-items": "center",
+                })
     ])
 
 ## Query data as pandas dataframe
