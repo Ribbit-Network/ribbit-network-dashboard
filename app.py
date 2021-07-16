@@ -49,11 +49,11 @@ def serve_layout():
             id='co2_graph',
             figure=co2_fig),
         dcc.Graph(
-            id='batt_graph',
-            figure=batt_fig),
-        dcc.Graph(
             id='solar_graph',
             figure=solar_fig),
+        dcc.Graph(
+            id='batt_graph',
+            figure=batt_fig),
         dcc.Interval(
             id='interval-component',
             interval=60*1000, # in milliseconds
