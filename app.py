@@ -67,7 +67,7 @@ def serve_layout():
 co2_fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
 solar_fig = px.line(get_influxdb_data(), x="_time", y="solar_power_watt", title="Solar Power (Watts)")
 batt_fig = px.line(get_influxdb_data(), x="_time", y="batt_bus_v", title="Battery Voltage")
-batt_power_fig = px.line(get_influxdb_data(), x="_time", y="batt_power_watt", title="Battery Power (Watts)")
+batt_power_fig = px.line(get_influxdb_data(), x="_time", y="batt_power_watt", title="Power Consumption (Watts)")
 
 # Only get the latest point for displaying on the map
 map_df = query_api.query_data_frame('from(bucket:"co2") '
@@ -109,7 +109,7 @@ def update_graph(n):
     temp_fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
     solar_fig = px.line(get_influxdb_data(), x="_time", y="solar_power_watt", title="Solar Power (Watts)")
     batt_fig = px.line(get_influxdb_data(), x="_time", y="batt_bus_v", title="Battery Voltage")
-    batt_power_fig = px.line(get_influxdb_data(), x="_time", y="batt_power_watt", title="Battery Power (Watts)")
+    batt_power_fig = px.line(get_influxdb_data(), x="_time", y="batt_power_watt", title="Power Consumption (Watts)")
     return temp_fig, solar_fig, batt_fig, batt_power_fig
 
 if __name__ == '__main__':
