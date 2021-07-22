@@ -26,7 +26,7 @@ def get_influxdb_data():
     data_frame = query_api.query_data_frame('from(bucket:"co2") '
                                             '|> range(start: -1h) '
                                             '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
-                                            '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time", "solar_power_watt", "batt_bus_v", "batt_power_watt"])')
+                                            '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
 
     return data_frame
 
@@ -48,12 +48,6 @@ def serve_layout():
         dcc.Graph(
             id='co2_graph',
             figure=co2_fig),
-        dcc.Graph(
-            id='solar_graph',
-            figure=solar_fig),
-        dcc.Graph(
-            id='batt_graph',
-            figure=batt_fig),
         dcc.Interval(
             id='interval-component',
             interval=60*1000, # in milliseconds
@@ -62,8 +56,6 @@ def serve_layout():
 
 ## Query data as pandas dataframe
 co2_fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
-solar_fig = px.line(get_influxdb_data(), x="_time", y="solar_power_watt", title="Solar Power (Watts)")
-batt_fig = px.line(get_influxdb_data(), x="_time", y="batt_bus_v", title="Battery Voltage")
 
 # Only get the latest point for displaying on the map
 map_df = query_api.query_data_frame('from(bucket:"co2") '
@@ -95,16 +87,12 @@ app.layout = serve_layout
 
 # update temperature graph
 @app.callback(Output('co2_graph', 'figure'),
-              Output('solar_graph', 'figure'),
-              Output('batt_graph', 'figure'),
               [Input('interval-component', 'n_intervals')
               ])
 def update_graph(n):
     ## Query data as pandas dataframe
-    temp_fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
-    solar_fig = px.line(get_influxdb_data(), x="_time", y="solar_power_watt", title="Solar Power (Watts)")
-    batt_fig = px.line(get_influxdb_data(), x="_time", y="batt_bus_v", title="Battery Voltage")
-    return temp_fig, solar_fig, batt_fig
+    co2_fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
+    return co2_fig
 
 if __name__ == '__main__':
     app.run_server(debug=True)
