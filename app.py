@@ -25,7 +25,7 @@ def get_influxdb_data():
     ## Query data as pandas dataframe
     data_frame = query_api.query_data_frame('from(bucket:"co2") '
                                             '|> range(start: -1h) '
-                                            '|> filter(fn: (r) => r.host == "af1ae06960bff131b214d73d7747d3b5")'
+                                            '|> filter(fn: (r) => r.host == "d14c9570bc4c341a76d11599c4aef438")'
                                             '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                             '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
 
