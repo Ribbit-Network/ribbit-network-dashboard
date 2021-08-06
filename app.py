@@ -36,7 +36,7 @@ def serve_layout():
     return html.Div([
         html.H1("CO2 PPM Database"),
         html.A(html.Button('Learn More!'),
-            href='https://github.com/keenanjohnson/ghg-gas-cloud'),
+            href='https://ribbitnetwork.org/'),
         html.H3('Sensor Map'),
         dcc.Graph(
             id='co2_globe',
