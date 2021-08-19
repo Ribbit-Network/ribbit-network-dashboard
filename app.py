@@ -34,7 +34,7 @@ def get_influxdb_data():
 def serve_layout():
     #Define this function to query new data on page load
     return html.Div([
-        html.H1("CO2 PPM Database"),
+        html.H1("Ribbit Network"),
         html.A(html.Button('Learn More!'),
             href='https://ribbitnetwork.org/'),
         html.H3('Sensor Map'),
