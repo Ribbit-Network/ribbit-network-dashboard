@@ -25,7 +25,7 @@ It is currently automatically deployed on [Heroku](https://dashboard.heroku.com/
 ## Contributing
 See the [Issues](https://github.com/Ribbit-Network/ribbit-network-dashboard/issues) section of this project for the work that I've currently scoped out to be done. Reach out to me if you are interested in helping out!
 
-[You can also join our developer discord here.](https://discord.gg/bnjz95qr)
+[You can also join our developer discord here.](https://discord.gg/vq8PkDb2TC)
 
 ## Background Information
 [See the Wiki for background research.](https://github.com/Ribbit-Network/ribbit-network-sensor/wiki/Background-Research) This project is inspired by some awesome research by incedible scientists in academia.
