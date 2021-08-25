@@ -15,7 +15,7 @@ This repository contains the dashboard for that public information
 ## Current Status
 This dashboard is in it's very earliest version and needs a lot of work.!
 
-The first prototype sensors are up and running in Seattle. [Here is some real data from that sensor](https://ghg-cloud.herokuapp.com/) (Note this dashboard is still experimental and may be down occasionally).
+The first prototype sensors are up and running in Seattle. [Here is some real data from that sensor](https://ribbit-network.herokuapp.com/) (Note this dashboard is still experimental and may be down occasionally).
 
 ## Technical Details
 The application is built as a [Dash app](https://plotly.com/dash/).
