@@ -3,7 +3,7 @@
 
 The Greenhouse Gas Sensor Cloud is a large network of open-source, low-cost, Greenhouse Gas (CO2 and possibly methane) Detection Sensors. These sensor units will be sold by the Ribbit Network and will upload their data to the cloud, creating the world's most complete Greenhouse Gas dataset.
 
-[See more about the cloud database here.](https://github.com/Ribbit-Network/ribbit-network-dashboard)
+[See more about the Frog Sesnors here.](https://github.com/Ribbit-Network/ribbit-network-frog-sensor)
 
 ## Dashboard
 The Ribbit Network saves the sensor data and makes it accessible for scientists everywhere to analyze and pinpoint emissions. Using this data we can identify and track emissions, allowing us to verify our assumptions about climate and hold ourselves accountable through corporate, government, and individual action.
