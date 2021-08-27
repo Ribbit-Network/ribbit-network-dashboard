@@ -22,6 +22,17 @@ The application is built as a [Dash app](https://plotly.com/dash/).
 
 It is currently automatically deployed on [Heroku](https://dashboard.heroku.com/) from this repository.
 
+You can run the website locally on your development machine using the following instructions after cloning this repo:
+
+```
+python3 -m venv env
+source env/bin/activate
+python3 -m pip install -r requirements.txt
+python3 app.py
+```
+
+Once the server is up and running you can visit it locally by going to http://127.0.0.1:8050/
+
 ## Contributing
 See the [Issues](https://github.com/Ribbit-Network/ribbit-network-dashboard/issues) section of this project for the work that I've currently scoped out to be done. Reach out to me if you are interested in helping out!
 
