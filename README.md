@@ -13,9 +13,9 @@ This repository contains the dashboard for that public information
 ![image](https://user-images.githubusercontent.com/2559382/128451521-2e97bbf5-b5f7-4663-b070-af488d3d1f65.png)
 
 ## Current Status
-This dashboard is in it's very earliest version and needs a lot of work.!
+This dashboard is in it's very earliest version and needs a lot of work.
 
-The first prototype sensors are up and running in Seattle. [Here is some real data from that sensor](https://ribbit-network.herokuapp.com/) (Note this dashboard is still experimental and may be down occasionally).
+The first prototype sensors are up and running in Seattle. [Here is the deployed version of this repo which shows the current live sensor data](https://ribbit-network.herokuapp.com/) (Note this dashboard is still experimental and may be down occasionally).
 
 ## Technical Details
 The application is built as a [Dash app](https://plotly.com/dash/).
@@ -35,6 +35,8 @@ Once the server is up and running you can visit it locally by going to http://12
 
 ## Contributing
 See the [Issues](https://github.com/Ribbit-Network/ribbit-network-dashboard/issues) section of this project for the work that I've currently scoped out to be done. Reach out to me if you are interested in helping out!
+
+The [contributing guide](CONTRIBUTING.md) outlines the process for helping out!
 
 [You can also join our developer discord here.](https://discord.gg/vq8PkDb2TC)
 
