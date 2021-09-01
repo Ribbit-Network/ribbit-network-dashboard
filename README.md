@@ -24,11 +24,20 @@ It is currently automatically deployed on [Heroku](https://dashboard.heroku.com/
 
 You can run the website locally on your development machine using the following instructions after cloning this repo:
 
+On mac/linux
 ```
 python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
 python3 app.py
+```
+
+On Windows
+```
+python -m venv env
+env\Scripts\activate
+python -m pip install -r requirements.txt
+python app.py
 ```
 
 Once the server is up and running you can visit it locally by going to http://127.0.0.1:8050/
