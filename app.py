@@ -66,30 +66,26 @@ map_df = query_api.query_data_frame('from(bucket:"co2") '
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                     '|> keep(columns: ["co2","lat", "lon"])')
 
-map_fig = px.scatter_geo(map_df,
-						lat = 'lat',
-						lon = 'lon',
-						hover_data = ['lat', 'lon', 'co2']
-						)
+map_fig = go.Figure(data=go.Scattergeo(
+	lat = map_df['lat'],
+    lon = map_df['lon'],
+    text = map_df['co2'].astype(str) + ' ppm',
+    marker = dict(
+        color = map_df['co2'],
+        colorscale = "Reds",
+        size = 10,
+    )
+))
 
-#globe_fig =go.Figure(data=go.Scattergeo(
-#    lon = map_df['lon'],
-#    lat = map_df['lat'],
-#    text = map_df['co2'],
-#    mode = 'markers',
-#    marker=dict(color="crimson", size=25,)
-#    ))
-#globe_fig.update_geos(
-#    projection_type="orthographic",
-#    landcolor="white",
-#    oceancolor="MidnightBlue",
-#    showocean=True,
-#    lakecolor="LightBlue",
-#    lataxis_showgrid=True,
-#    lonaxis_showgrid=True,
-#    projection_rotation=dict(lon=-122, lat=25, roll=0)
-#)
-#globe_fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
+map_fig.update_geos(
+    landcolor="white",
+    showocean=True, oceancolor="MidnightBlue",
+    showlakes=True, lakecolor="LightBlue",
+    lataxis_showgrid=True,
+    lonaxis_showgrid=True
+)
+
+map_fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
 
 app.layout = serve_layout
 
