@@ -51,7 +51,7 @@ def serve_layout():
             id='interval-component',
             interval=60*1000, # in milliseconds
             n_intervals=0),
-        html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')])
+        html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
         html.Div(id='timezone', hidden=True)
     ])
 
