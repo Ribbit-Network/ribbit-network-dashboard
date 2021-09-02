@@ -53,7 +53,7 @@ def serve_layout():
             id='interval-component',
             interval=60*1000, # in milliseconds
             n_intervals=0),
-        html.Div(id='timezone')
+        html.Div(id='timezone', hidden=True)
     ])
 
 ## Query data as pandas dataframe
