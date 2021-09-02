@@ -52,6 +52,7 @@ def serve_layout():
             interval=60*1000, # in milliseconds
             n_intervals=0),
         html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')])
+        html.Div(id='timezone', hidden=True)
     ])
 
 @app.callback(Output('download', 'data'), Input('export', 'n_clicks'))
@@ -91,14 +92,23 @@ globe_fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
 
 app.layout = serve_layout
 
-# update temperature graph
-@app.callback(Output('co2_graph', 'figure'),
-              [Input('interval-component', 'n_intervals')
-              ])
-def update_graph(n):
-    ## Query data as pandas dataframe
-    co2_fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
-    return co2_fig
+# Get browser timezone
+app.clientside_callback(
+    '''
+    function(n_intervals) {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone
+    }
+    ''',
+    Output('timezone', 'children'),
+    Input('interval-component', 'n_intervals')
+)
+
+# Update CO2 graph
+@app.callback(Output('co2_graph', 'figure'), Input('timezone', 'children'))
+def update_graph(timezone):
+    df = get_influxdb_data()
+    df['_time'] = df['_time'].dt.tz_convert(timezone)
+    return px.line(df, x="_time", y="co2", title="Co2 PPM")
 
 if __name__ == '__main__':
     app.run_server(debug=True)
