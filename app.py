@@ -47,6 +47,9 @@ def serve_layout():
         dcc.Graph(
             id='co2_graph',
             figure=co2_fig),
+        dcc.Graph(
+            id='temp_graph',
+            figure=temp_fig),
         dcc.Interval(
             id='interval-component',
             interval=60*1000, # in milliseconds
@@ -63,6 +66,9 @@ def export_data(n_clicks):
 
 ## Query data as pandas dataframe
 co2_fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
+temp_fig = px.line(get_influxdb_data(), x="_time", y="temperature", title="Temperature Over Time",
+                    labels={"_time":"Time", "temperature":"Temperature [C]"}, 
+                    hover_data={"temperature":':.2f'})
 
 # Only get the latest point for displaying on the map
 map_df = query_api.query_data_frame('from(bucket:"co2") '
