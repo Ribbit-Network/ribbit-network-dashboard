@@ -24,7 +24,7 @@ def get_influxdb_data(duration):
     ## Query data as pandas dataframe
     df = query_api.query_data_frame('from(bucket:"co2")'
                                     f'|> range(start: -{duration})'
-                                    '|> filter(fn: (r) => r.host == "af1ae06960bff131b214d73d7747d3b5")'
+                                    '|> filter(fn: (r) => r.host == "6cb1b8e43a19bdb3950a118a36af3452")'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
                                     '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
     return df.drop(['result', 'table'], axis=1)
@@ -47,16 +47,15 @@ def serve_layout():
         }),
 
         html.H3('Sensor Data'),
-        dcc.Graph(id='co2_graph', figure=co2_fig),
-        dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
-        html.Div(id='timezone', hidden=True),
-
         dcc.Dropdown(id='duration', value='1h', options=[
             {'label': '10 minutes', 'value': '10m'},
             {'label': '30 minutes', 'value': '30m'},
             {'label': '1 hour',     'value': '1h'},
             {'label': '1 day',      'value': '24h'},
         ]),
+        dcc.Graph(id='co2_graph', figure=co2_fig),
+        dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
+        html.Div(id='timezone', hidden=True),
         html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
     ])
 
