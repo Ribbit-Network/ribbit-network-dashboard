@@ -71,13 +71,13 @@ map_df = query_api.query_data_frame('from(bucket:"co2") '
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                     '|> keep(columns: ["co2","lat", "lon"])')
 
-globe_fig =go.Figure(data=go.Scattergeo(
-    lon = map_df['lon'],
-    lat = map_df['lat'],
-    text = map_df['co2'],
-    mode = 'markers',
-    marker=dict(color="crimson", size=25,)
-    ))
+globe_fig = go.Figure(data=go.Scattergeo(
+    lon=map_df['lon'],
+    lat=map_df['lat'],
+    text='CO₂: '+map_df['co2'].astype('str'),
+    mode='markers',
+    marker=dict(color="crimson", size=25)
+))
 globe_fig.update_geos(
     projection_type="orthographic",
     landcolor="white",
