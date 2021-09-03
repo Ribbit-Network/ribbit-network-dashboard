@@ -24,7 +24,7 @@ def get_influxdb_data():
     ## Query data as pandas dataframe
     df = query_api.query_data_frame('from(bucket:"co2") '
                                     '|> range(start: -1h) '
-                                    '|> filter(fn: (r) => r.host == "6cb1b8e43a19bdb3950a118a36af3452")'
+                                    '|> filter(fn: (r) => r.host == "af1ae06960bff131b214d73d7747d3b5")'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                     '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
     return df.drop(['result', 'table'], axis=1)
@@ -71,13 +71,13 @@ map_df = query_api.query_data_frame('from(bucket:"co2") '
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                     '|> keep(columns: ["co2","lat", "lon"])')
 
-globe_fig =go.Figure(data=go.Scattergeo(
-    lon = map_df['lon'],
-    lat = map_df['lat'],
-    text = map_df['co2'],
-    mode = 'markers',
-    marker=dict(color="crimson", size=25,)
-    ))
+globe_fig = go.Figure(data=go.Scattergeo(
+    lon=map_df['lon'],
+    lat=map_df['lat'],
+    text='CO₂: '+map_df['co2'].astype('str'),
+    mode='markers',
+    marker=dict(color="crimson", size=25)
+))
 globe_fig.update_geos(
     projection_type="orthographic",
     landcolor="white",
