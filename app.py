@@ -10,10 +10,8 @@ import os
 import plotly.express as px
 import plotly.graph_objects as go
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
 # Dash App
-app = dash.Dash(__name__, title='GHG Cloud', external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, title='Ribbit Network')
 server = app.server
 
 # Connect to InfluxDB
@@ -30,37 +28,31 @@ def get_influxdb_data(duration):
     return df.drop(['result', 'table'], axis=1)
 
 def serve_layout():
-    #Define this function to query new data on page load
     return html.Div([
         html.Div(id='onload', hidden=True),
 
-        html.H1("Ribbit Network"),
-        html.A(html.Button('Learn More!'), href='https://ribbitnetwork.org/'),
+        html.Div([
+            html.Img(src='assets/frog.svg'),
+            html.H1('Ribbit Network'),
+            html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'none', 'color': 'black'}),
+        ], id='nav'),
 
-        html.H3('Sensor Map'),
-        dcc.Graph(
-            id='co2_globe',
-            figure=globe_fig,
-            style={
-            "width": "100%",
-            'display': 'inline-block'
-        }),
-
-        html.H3('Sensor Data'),
-        dcc.Dropdown(id='duration', value='1h', options=[
+        dcc.Dropdown(id='duration', clearable=False, searchable=False, value='1h', options=[
             {'label': '10 minutes', 'value': '10m'},
             {'label': '30 minutes', 'value': '30m'},
             {'label': '1 hour',     'value': '1h'},
             {'label': '1 day',      'value': '24h'},
         ]),
-        dcc.Graph(id='co2_graph', figure=co2_fig),
-        dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
-        html.Div(id='timezone', hidden=True),
-        html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
-    ])
 
-## Query data as pandas dataframe
-co2_fig = px.line(get_influxdb_data('1h'), x="_time", y="co2", title="Co2 PPM")
+        dcc.Graph(id='globe', figure=globe_fig),
+
+        html.Div([
+            dcc.Graph(id='graph'),
+            dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
+            html.Div(id='timezone', hidden=True),
+            html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
+        ]),
+    ])
 
 # Only get the latest point for displaying on the map
 map_df = query_api.query_data_frame('from(bucket:"co2") '
@@ -74,19 +66,20 @@ globe_fig = go.Figure(data=go.Scattergeo(
     lat=map_df['lat'],
     text='CO₂: '+map_df['co2'].astype('str'),
     mode='markers',
-    marker=dict(color="crimson", size=25)
+    marker=dict(color='rgb(134, 214, 76)', size=10, line=dict(width=1, color='rgb(4, 5, 4)'))
 ))
 globe_fig.update_geos(
-    projection_type="orthographic",
-    landcolor="white",
-    oceancolor="MidnightBlue",
+    projection_type='orthographic',
+    projection_rotation=dict(lon=-122, lat=25, roll=0),
+    landcolor='white',
+    oceancolor='#3399FF',
+    lakecolor='#3399FF',
+    framecolor='black',
+    showcoastlines=False,
     showocean=True,
-    lakecolor="LightBlue",
-    lataxis_showgrid=True,
-    lonaxis_showgrid=True,
-    projection_rotation=dict(lon=-122, lat=25, roll=0)
+    showframe=True,
 )
-globe_fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
+globe_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 app.layout = serve_layout
 
@@ -103,7 +96,7 @@ app.clientside_callback(
 
 # Update CO2 graph
 @app.callback(
-    Output('co2_graph', 'figure'),
+    Output('graph', 'figure'),
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
@@ -112,8 +105,9 @@ app.clientside_callback(
 )
 def update_graph(timezone, duration, n_intervals):
     df = get_influxdb_data(duration)
-    df['_time'] = df['_time'].dt.tz_convert(timezone)
-    return px.line(df, x="_time", y="co2", title="Co2 PPM")
+    df.columns = ['Time', 'Altitude', 'CO₂ (PPM)', 'Humidity', 'Latitude', 'Longitude', 'Temperature']
+    df['Time'] = df['Time'].dt.tz_convert(timezone)
+    return px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
 
 # Export data as CSV
 @app.callback(Output('download', 'data'), [Input('export', 'n_clicks'), Input('duration', 'value')])
