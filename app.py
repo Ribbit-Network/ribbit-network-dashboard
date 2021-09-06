@@ -105,12 +105,12 @@ app.clientside_callback(
         Input('interval', 'n_intervals'),
     ],
 )
-def update_graph(timezone, duration, n_intervals):
+def update_graphs(timezone, duration, n_intervals):
     df = get_influxdb_data(duration)
-    df.columns = ['Time', 'Altitude', 'CO₂ (PPM)', 'Humidity', 'Latitude', 'Longitude', 'Temperature']
+    df.columns = ['Time', 'Altitude', 'CO₂ (PPM)', 'Humidity', 'Latitude', 'Longitude', 'Temperature (C)']
     df['Time'] = df['Time'].dt.tz_convert(timezone)
     co2_line = px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
-    temp_line
+    temp_line = px.line(df, x='Time', y='Temperature (C)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
     return co2_line, temp_line
 
 # Export data as CSV
