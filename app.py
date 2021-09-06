@@ -9,66 +9,52 @@ import dash_table
 import os
 import plotly.express as px
 import plotly.graph_objects as go
-
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+import plotly.express as px
 
 # Dash App
-app = dash.Dash(__name__, title='GHG Cloud', external_stylesheets=external_stylesheets, prevent_initial_callbacks=True)
+app = dash.Dash(__name__, title='Ribbit Network')
 server = app.server
 
 # Connect to InfluxDB
 client = InfluxDBClient.from_config_file("influx_config.ini")
 query_api = client.query_api()
 
-def get_influxdb_data():
+def get_influxdb_data(duration):
     ## Query data as pandas dataframe
-    df = query_api.query_data_frame('from(bucket:"co2") '
-                                    '|> range(start: -1h) '
+    df = query_api.query_data_frame('from(bucket:"co2")'
+                                    f'|> range(start: -{duration})'
                                     '|> filter(fn: (r) => r.host == "6cb1b8e43a19bdb3950a118a36af3452")'
-                                    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
+                                    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
                                     '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
     return df.drop(['result', 'table'], axis=1)
 
 def serve_layout():
-    #Define this function to query new data on page load
     return html.Div([
-        html.H1("Ribbit Network"),
-        html.A(html.Button('Learn More!'),
-            href='https://ribbitnetwork.org/'),
-        html.H3('Sensor Map'),
-        dcc.Graph(
-            id='co2_globe',
-            figure=globe_fig,
-            style={
-            "width": "100%",
-            'display': 'inline-block'
-        }),
-        html.H3('Sensor Data'),
-        dcc.Graph(
-            id='co2_graph',
-            figure=co2_fig),
-        dcc.Graph(
-            id='temp_graph',
-            figure=temp_fig),
-        dcc.Interval(
-            id='interval-component',
-            interval=60*1000, # in milliseconds
-            n_intervals=0),
-        html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
-        html.Div(id='timezone', hidden=True)
+        html.Div(id='onload', hidden=True),
+
+        html.Div([
+            html.Img(src='assets/frog.svg'),
+            html.H1('Ribbit Network'),
+            html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'none', 'color': 'black'}),
+        ], id='nav'),
+
+        dcc.Dropdown(id='duration', clearable=False, searchable=False, value='1h', options=[
+            {'label': '10 minutes', 'value': '10m'},
+            {'label': '30 minutes', 'value': '30m'},
+            {'label': '1 hour',     'value': '1h'},
+            {'label': '1 day',      'value': '24h'},
+        ]),
+
+        dcc.Graph(id='map', figure=map_fig),
+
+        html.Div([
+            dcc.Graph(id='co2_graph'),
+            dcc.Graph(id='temp_graph'),
+            dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
+            html.Div(id='timezone', hidden=True),
+            html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
+        ]),
     ])
-
-@app.callback(Output('download', 'data'), Input('export', 'n_clicks'))
-def export_data(n_clicks):
-    df = get_influxdb_data()
-    df.columns = ['Timestamp', 'Altitude', 'CO2', 'Humidity', 'Latitude', 'Longitude', 'Temperature']
-    return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
-
-## Query data as pandas dataframe
-co2_fig = px.line(get_influxdb_data(), x="_time", y="co2", title="Co2 PPM")
-temp_fig = px.line(get_influxdb_data(), x="_time", y="temperature", title="Temperature Over Time",
-                    labels={"_time":"Time", "temperature":"Temperature [C]"}, 
-                    hover_data={"temperature":':.2f'})
 
 # Only get the latest point for displaying on the map
 map_df = query_api.query_data_frame('from(bucket:"co2") '
@@ -77,24 +63,24 @@ map_df = query_api.query_data_frame('from(bucket:"co2") '
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                     '|> keep(columns: ["co2","lat", "lon"])')
 
-globe_fig =go.Figure(data=go.Scattergeo(
-    lon = map_df['lon'],
-    lat = map_df['lat'],
-    text = map_df['co2'],
-    mode = 'markers',
-    marker=dict(color="crimson", size=25,)
-    ))
-globe_fig.update_geos(
-    projection_type="orthographic",
-    landcolor="white",
-    oceancolor="MidnightBlue",
+
+map_fig = go.Figure(data=go.Scattergeo(
+    lon=map_df['lon'],
+    lat=map_df['lat'],
+    text='CO₂: '+map_df['co2'].astype('str'),
+    mode='markers',
+    marker=dict(color='rgb(134, 214, 76)', size=10, line=dict(width=1, color='rgb(4, 5, 4)'))
+))
+map_fig.update_geos(
+    landcolor='white',
+    oceancolor='#3399FF',
+    lakecolor='#3399FF',
+    framecolor='black',
+    showcoastlines=False,
     showocean=True,
-    lakecolor="LightBlue",
-    lataxis_showgrid=True,
-    lonaxis_showgrid=True,
-    projection_rotation=dict(lon=-122, lat=25, roll=0)
+    showframe=True,
 )
-globe_fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
+map_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 app.layout = serve_layout
 
@@ -106,15 +92,35 @@ app.clientside_callback(
     }
     ''',
     Output('timezone', 'children'),
-    Input('interval-component', 'n_intervals')
+    Input('onload', 'children'),
 )
 
 # Update CO2 graph
-@app.callback(Output('co2_graph', 'figure'), Input('timezone', 'children'))
-def update_graph(timezone):
-    df = get_influxdb_data()
-    df['_time'] = df['_time'].dt.tz_convert(timezone)
-    return px.line(df, x="_time", y="co2", title="Co2 PPM")
+@app.callback(
+    Output('co2_graph', 'figure'),
+    Output('temp_graph', 'figure'),
+    [
+        Input('timezone', 'children'),
+        Input('duration', 'value'),
+        Input('interval', 'n_intervals'),
+    ],
+)
+def update_graph(timezone, duration, n_intervals):
+    df = get_influxdb_data(duration)
+    df.columns = ['Time', 'Altitude', 'CO₂ (PPM)', 'Humidity', 'Latitude', 'Longitude', 'Temperature']
+    df['Time'] = df['Time'].dt.tz_convert(timezone)
+    co2_line = px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
+    temp_line
+    return co2_line, temp_line
+
+# Export data as CSV
+@app.callback(Output('download', 'data'), [Input('export', 'n_clicks'), Input('duration', 'value')])
+def export_data(n_clicks, duration):
+    if n_clicks == None:
+        return
+    df = get_influxdb_data(duration)
+    df.columns = ['Timestamp', 'Altitude', 'CO2', 'Humidity', 'Latitude', 'Longitude', 'Temperature']
+    return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
 
 if __name__ == '__main__':
     app.run_server(debug=True)
