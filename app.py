@@ -71,8 +71,6 @@ map_fig = go.Figure(data=go.Scattergeo(
     marker=dict(color='rgb(134, 214, 76)', size=10, line=dict(width=1, color='rgb(4, 5, 4)'))
 ))
 map_fig.update_geos(
-    projection_type='orthographic',
-    projection_rotation=dict(lon=-122, lat=25, roll=0),
     landcolor='white',
     oceancolor='#3399FF',
     lakecolor='#3399FF',
