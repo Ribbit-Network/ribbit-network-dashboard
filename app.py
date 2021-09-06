@@ -64,22 +64,14 @@ map_df = query_api.query_data_frame('from(bucket:"co2") '
                                     '|> keep(columns: ["co2","lat", "lon"])')
 
 
-map_fig = go.Figure(data=go.Scattergeo(
+map_fig = go.Figure(data=go.Scattermapbox(
     lon=map_df['lon'],
     lat=map_df['lat'],
     text='CO₂: '+map_df['co2'].astype('str'),
     mode='markers',
-    marker=dict(color='rgb(134, 214, 76)', size=10, line=dict(width=1, color='rgb(4, 5, 4)'))
+    marker=dict(color='rgb(134, 214, 76)', size=18)
 ))
-map_fig.update_geos(
-    landcolor='white',
-    oceancolor='#3399FF',
-    lakecolor='#3399FF',
-    framecolor='black',
-    showcoastlines=False,
-    showocean=True,
-    showframe=True,
-)
+map_fig.update_layout(mapbox_style="carto-positron")
 map_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 app.layout = serve_layout
