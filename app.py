@@ -48,7 +48,8 @@ def serve_layout():
         dcc.Graph(id='map', figure=map_fig),
 
         html.Div([
-            dcc.Graph(id='graph'),
+            dcc.Graph(id='co2_graph'),
+            dcc.Graph(id='temp_graph'),
             dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
             html.Div(id='timezone', hidden=True),
             html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
@@ -96,18 +97,21 @@ app.clientside_callback(
 
 # Update CO2 graph
 @app.callback(
-    Output('graph', 'figure'),
+    Output('co2_graph', 'figure'),
+    Output('temp_graph', 'figure'),
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
         Input('interval', 'n_intervals'),
     ],
 )
-def update_graph(timezone, duration, n_intervals):
+def update_graphs(timezone, duration, n_intervals):
     df = get_influxdb_data(duration)
-    df.columns = ['Time', 'Altitude', 'CO₂ (PPM)', 'Humidity', 'Latitude', 'Longitude', 'Temperature']
+    df.columns = ['Time', 'Altitude', 'CO₂ (PPM)', 'Humidity', 'Latitude', 'Longitude', 'Temperature (C)']
     df['Time'] = df['Time'].dt.tz_convert(timezone)
-    return px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
+    co2_line = px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
+    temp_line = px.line(df, x='Time', y='Temperature (C)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
+    return co2_line, temp_line
 
 # Export data as CSV
 @app.callback(Output('download', 'data'), [Input('export', 'n_clicks'), Input('duration', 'value')])
