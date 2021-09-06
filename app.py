@@ -9,6 +9,7 @@ import dash_table
 import os
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.express as px
 
 # Dash App
 app = dash.Dash(__name__, title='Ribbit Network')
@@ -44,7 +45,7 @@ def serve_layout():
             {'label': '1 day',      'value': '24h'},
         ]),
 
-        dcc.Graph(id='globe', figure=globe_fig),
+        dcc.Graph(id='map', figure=map_fig),
 
         html.Div([
             dcc.Graph(id='graph'),
@@ -61,16 +62,15 @@ map_df = query_api.query_data_frame('from(bucket:"co2") '
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                     '|> keep(columns: ["co2","lat", "lon"])')
 
-globe_fig = go.Figure(data=go.Scattergeo(
+
+map_fig = go.Figure(data=go.Scattergeo(
     lon=map_df['lon'],
     lat=map_df['lat'],
     text='CO₂: '+map_df['co2'].astype('str'),
     mode='markers',
     marker=dict(color='rgb(134, 214, 76)', size=10, line=dict(width=1, color='rgb(4, 5, 4)'))
 ))
-globe_fig.update_geos(
-    projection_type='orthographic',
-    projection_rotation=dict(lon=-122, lat=25, roll=0),
+map_fig.update_geos(
     landcolor='white',
     oceancolor='#3399FF',
     lakecolor='#3399FF',
@@ -79,7 +79,7 @@ globe_fig.update_geos(
     showocean=True,
     showframe=True,
 )
-globe_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+map_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 app.layout = serve_layout
 
