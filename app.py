@@ -31,6 +31,12 @@ def get_influxdb_data(duration, host):
 
     return df.drop(['result', 'table'], axis=1)
 
+df_host = query_api.query_data_frame('from(bucket:"co2") '
+                                    '|> range(start:-15m) '
+                                    '|> limit(n:1) '
+                                    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
+                                    '|> keep(columns: ["host"])')
+
 def serve_layout():
     return html.Div([
         html.Div(id='onload', hidden=True),
@@ -54,8 +60,7 @@ def serve_layout():
         ]),
 
         dcc.Dropdown(id='host', clearable=False, searchable=False, value='6cb1b8e43a19bdb3950a118a36af3452', options=[
-            {'label': 'sensor 1', 'value': '6cb1b8e43a19bdb3950a118a36af3452'},
-            {'label': 'sensor 2', 'value': 'af1ae06960bff131b214d73d7747d3b5'},
+            {'label': 'sensor '+str(index+1), 'value': row} for index, row in df_host['host'].iteritems()
         ]),
 
         html.Div([
