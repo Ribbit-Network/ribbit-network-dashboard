@@ -25,7 +25,7 @@ def get_influxdb_data(duration):
                                     f'|> range(start: -{duration})'
                                     '|> filter(fn: (r) => r.host == "6cb1b8e43a19bdb3950a118a36af3452")'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
-                                    '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time"])')
+                                    '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time", "baro_pressure"])')
     return df.drop(['result', 'table'], axis=1)
 
 def serve_layout():
@@ -50,6 +50,8 @@ def serve_layout():
         html.Div([
             dcc.Graph(id='co2_graph'),
             dcc.Graph(id='temp_graph'),
+            dcc.Graph(id='baro_graph'),
+            dcc.Graph(id='humidity_graph'),
             dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
             html.Div(id='timezone', hidden=True),
             html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
@@ -91,6 +93,8 @@ app.clientside_callback(
 @app.callback(
     Output('co2_graph', 'figure'),
     Output('temp_graph', 'figure'),
+    Output('baro_graph', 'figure'),
+    Output('humidity_graph', 'figure'),
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
@@ -99,11 +103,13 @@ app.clientside_callback(
 )
 def update_graphs(timezone, duration, n_intervals):
     df = get_influxdb_data(duration)
-    df.columns = ['Time', 'Altitude', 'CO₂ (PPM)', 'Humidity', 'Latitude', 'Longitude', 'Temperature (C)']
+    df.columns = ['Time', 'Altitude', 'Barometric Pressure (mBar)', 'CO₂ (PPM)', 'Humidity (%)', 'Latitude', 'Longitude', 'Temperature (C)']
     df['Time'] = df['Time'].dt.tz_convert(timezone)
     co2_line = px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
     temp_line = px.line(df, x='Time', y='Temperature (C)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
-    return co2_line, temp_line
+    baro_line = px.line(df, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
+    humidity_line = px.line(df, x='Time', y='Humidity (%)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg')
+    return co2_line, temp_line, baro_line, humidity_line
 
 # Export data as CSV
 @app.callback(Output('download', 'data'), [Input('export', 'n_clicks'), Input('duration', 'value')])
