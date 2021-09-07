@@ -31,13 +31,13 @@ def get_influxdb_data(duration, host):
 
     return df.drop(['result', 'table'], axis=1)
 
-df_host = query_api.query_data_frame('from(bucket:"co2") '
-                                    '|> range(start:-15m) '
-                                    '|> limit(n:1) '
-                                    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
-                                    '|> keep(columns: ["host"])')
-
 def serve_layout():
+    df_host = query_api.query_data_frame('from(bucket:"co2") '
+                                         '|> range(start:-15m) '
+                                         '|> limit(n:1) '
+                                         '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
+                                         '|> keep(columns: ["host"])')
+
     return html.Div([
         html.Div(id='onload', hidden=True),
 
@@ -47,7 +47,7 @@ def serve_layout():
             html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'none', 'color': 'black'}),
         ], id='nav'),
 
-        dcc.Graph(id='map', figure=map_fig),
+        dcc.Graph(id='map'),
 
         dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
 
@@ -74,23 +74,6 @@ def serve_layout():
         ]),
     ])
 
-# Only get the latest point for displaying on the map
-map_df = query_api.query_data_frame('from(bucket:"co2") '
-                                    '|> range(start:-15m) '
-                                    '|> limit(n:1) '
-                                    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
-                                    '|> keep(columns: ["co2", "lat", "lon"])')
-
-map_fig = go.Figure(data=go.Scattermapbox(
-    lon=map_df['lon'],
-    lat=map_df['lat'],
-    text='CO₂: '+map_df['co2'].round(decimals=2).astype('str'),
-    mode='markers',
-    marker=dict(color=map_df['co2'], size=18, showscale = True, cmin=300, cmax = 600)
-))
-map_fig.update_layout(mapbox_style="carto-positron")
-map_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-
 app.layout = serve_layout
 
 # Get browser timezone
@@ -104,7 +87,32 @@ app.clientside_callback(
     Input('onload', 'children'),
 )
 
-# Update CO2 graph
+# Update the Map
+@app.callback(Output('map', 'figure'), [Input('onload', 'children'), Input('interval', 'n_intervals')])
+def update_map(children, n_intervals):
+     # Only get the latest point for displaying on the map
+    map_df = query_api.query_data_frame('from(bucket:"co2") '
+                                        '|> range(start:-15m) '
+                                        '|> limit(n:1) '
+                                        '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
+                                        '|> keep(columns: ["co2", "lat", "lon"])')
+
+    map_fig = go.Figure(data=go.Scattermapbox(
+        lon=map_df['lon'],
+        lat=map_df['lat'],
+        text='CO₂: '+map_df['co2'].round(decimals=2).astype('str'),
+        mode='markers',
+        marker=dict(color=map_df['co2'], size=18, showscale = True, cmin=300, cmax = 600)
+    ))
+    map_fig.update_layout(mapbox_style="carto-positron")
+    map_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    # Preserve the Map state accross updates (zoom level, selections, etc)
+    # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
+    map_fig.update_layout(uirevision="dataset")
+
+    return map_fig
+
+# Update Data Plots
 @app.callback(
     Output('co2_graph', 'figure'),
     Output('temp_graph', 'figure'),
@@ -117,7 +125,6 @@ app.clientside_callback(
         Input('interval', 'n_intervals'),
     ],
 )
-
 def update_graphs(timezone, duration, host, n_intervals):
     df = get_influxdb_data(duration, host)
     df.rename(columns = {'_time':'Time', 'co2':'CO₂ (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 
