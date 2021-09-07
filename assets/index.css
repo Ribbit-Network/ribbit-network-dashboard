@@ -20,7 +20,12 @@ body {
 }
 
 #duration {
-    margin: 0 0 16px 16px;
+    margin: 16px 0 16px 16px;
+    width: 280px;
+}
+
+#host {
+    margin: 16px 0 16px 16px;
     width: 280px;
 }
 

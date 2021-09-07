@@ -19,14 +19,16 @@ server = app.server
 client = InfluxDBClient.from_config_file("influx_config.ini")
 query_api = client.query_api()
 
-def get_influxdb_data(duration):
+
+def get_influxdb_data(duration, host):
     ## Query data as pandas dataframe
     df = query_api.query_data_frame('from(bucket:"co2")'
                                     f'|> range(start: -{duration})'
-                                    '|> filter(fn: (r) => r.host == "6cb1b8e43a19bdb3950a118a36af3452")'
+                                    f'|> filter(fn: (r) => r.host == "{host}")'
                                     '|> aggregateWindow(every: 1m, fn: mean, createEmpty: false)'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
                                     '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time", "baro_pressure"])')
+
     return df.drop(['result', 'table'], axis=1)
 
 def serve_layout():
@@ -39,7 +41,10 @@ def serve_layout():
             html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'none', 'color': 'black'}),
         ], id='nav'),
 
+        dcc.Graph(id='map', figure=map_fig),
+
         dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
+
             {'label': '10 minutes', 'value': '10m'},
             {'label': '30 minutes', 'value': '30m'},
             {'label': '1 hour',     'value': '1h'},
@@ -48,7 +53,10 @@ def serve_layout():
             {'label': '30 days',      'value': '30d'},
         ]),
 
-        dcc.Graph(id='map', figure=map_fig),
+        dcc.Dropdown(id='host', clearable=False, searchable=False, value='6cb1b8e43a19bdb3950a118a36af3452', options=[
+            {'label': 'sensor 1', 'value': '6cb1b8e43a19bdb3950a118a36af3452'},
+            {'label': 'sensor 2', 'value': 'af1ae06960bff131b214d73d7747d3b5'},
+        ]),
 
         html.Div([
             dcc.Graph(id='co2_graph'),
@@ -66,8 +74,7 @@ map_df = query_api.query_data_frame('from(bucket:"co2") '
                                     '|> range(start:-15m) '
                                     '|> limit(n:1) '
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
-                                    '|> keep(columns: ["co2","lat", "lon"])')
-
+                                    '|> keep(columns: ["co2", "lat", "lon"])')
 
 map_fig = go.Figure(data=go.Scattermapbox(
     lon=map_df['lon'],
@@ -101,11 +108,13 @@ app.clientside_callback(
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
+        Input('host', 'value'),
         Input('interval', 'n_intervals'),
     ],
 )
-def update_graphs(timezone, duration, n_intervals):
-    df = get_influxdb_data(duration)
+
+def update_graphs(timezone, duration, host, n_intervals):
+    df = get_influxdb_data(duration, host)
     df.rename(columns = {'_time':'Time', 'co2':'CO₂ (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 
                          'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
     df['Time'] = df['Time'].dt.tz_convert(timezone)
