@@ -32,10 +32,18 @@ python3 -m pip install -r requirements.txt
 python3 app.py
 ```
 
-On Windows
+On Windows (If using Git Bash)
 ```
 python3 -m venv env
 env/Scripts/activate
+python3 -m pip install -r requirements.txt
+python3 app.py
+```
+
+On Windows (If using Command Prompt)
+```
+python3 -m venv env
+env\Scripts\activate
 python3 -m pip install -r requirements.txt
 python3 app.py
 ```
