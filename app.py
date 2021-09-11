@@ -128,12 +128,12 @@ def update_map(children, n_intervals):
 def update_graphs(timezone, duration, host, n_intervals):
     df = get_influxdb_data(duration, host)
     df.rename(columns = {'_time':'Time', 'co2':'CO₂ (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 
-                         'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
+                         'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (°C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
     df['Time'] = df['Time'].dt.tz_convert(timezone)
     co2_line = px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'],
                        template='plotly_white', render_mode='svg', hover_data = {'CO₂ (PPM)':':.2f'})
-    temp_line = px.line(df, x='Time', y='Temperature (C)', color_discrete_sequence=['black'], 
-                        template='plotly_white', render_mode='svg', hover_data = {'Temperature (C)':':.2f'})
+    temp_line = px.line(df, x='Time', y='Temperature (°C)', color_discrete_sequence=['black'], 
+                        template='plotly_white', render_mode='svg', hover_data = {'Temperature (°C)':':.2f'})
     baro_line = px.line(df, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'],
                         template='plotly_white', render_mode='svg', hover_data = {'Barometric Pressure (mBar)':':.2f'})
     humidity_line = px.line(df, x='Time', y='Humidity (%)', color_discrete_sequence=['black'],
@@ -141,12 +141,12 @@ def update_graphs(timezone, duration, host, n_intervals):
     return co2_line, temp_line, baro_line, humidity_line
 
 # Export data as CSV
-@app.callback(Output('download', 'data'), [Input('export', 'n_clicks'), Input('duration', 'value')])
-def export_data(n_clicks, duration):
+@app.callback(Output('download', 'data'), [Input('export', 'n_clicks'), Input('duration', 'value'), Input('host', 'value')])
+def export_data(n_clicks, duration, host):
     if n_clicks == None:
         return
-    df = get_influxdb_data(duration)
-    df.columns = ['Timestamp', 'Altitude', 'CO2', 'Humidity', 'Latitude', 'Longitude', 'Temperature']
+    df = get_influxdb_data(duration, host)
+    df.columns = ['Timestamp', 'Altitude (m)', 'CO₂ (PPM)', 'Humidity (%)', 'Latitude', 'Longitude', 'Barometric Pressure (mBar)', 'Temperature (°C)']
     return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
 
 if __name__ == '__main__':
