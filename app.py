@@ -61,7 +61,13 @@ def serve_layout():
                 {'label': '7 days',     'value': '7d'},
                 {'label': '30 days',    'value': '30d'},
             ]),
-            html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
+            html.Div([
+                html.Button(html.Div([
+                    html.Img(src='assets/download.svg'),
+                    'Export as CSV',
+                ]), id='export'),
+                dcc.Download(id='download'),
+            ]),
         ], id='controls'),
 
         html.Div([
