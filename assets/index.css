@@ -25,19 +25,19 @@ body {
 }
 
 #controls #host {
-    margin-right: 16px;
-    width: 280px;
+    margin-right: 8px;
+    width: 128px;
 }
 
 #controls #duration {
-    margin-right: 16px;
-    width: 280px;
+    margin-right: 8px;
+    width: 128px;
 }
 
 #controls #export {
     background-color: white;
     border-radius: 2px;
     border: 1px solid silver;
-    font-size: 12px;
+    font-size: 16px;
     height: 100%;
 }

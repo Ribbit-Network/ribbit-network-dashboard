@@ -32,12 +32,20 @@ python3 -m pip install -r requirements.txt
 python3 app.py
 ```
 
-On Windows
+On Windows (If using Git Bash)
 ```
-python -m venv env
+python3 -m venv env
+env/Scripts/activate
+python3 -m pip install -r requirements.txt
+python3 app.py
+```
+
+On Windows (If using Command Prompt)
+```
+python3 -m venv env
 env\Scripts\activate
-python -m pip install -r requirements.txt
-python app.py
+python3 -m pip install -r requirements.txt
+python3 app.py
 ```
 
 Once the server is up and running you can visit it locally by going to http://127.0.0.1:8050/
