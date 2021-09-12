@@ -49,19 +49,26 @@ def serve_layout():
 
         dcc.Graph(id='map'),
 
-        dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
-
-            {'label': '10 minutes', 'value': '10m'},
-            {'label': '30 minutes', 'value': '30m'},
-            {'label': '1 hour',     'value': '1h'},
-            {'label': '1 day',      'value': '24h'},
-            {'label': '7 days',      'value': '7d'},
-            {'label': '30 days',      'value': '30d'},
-        ]),
-
-        dcc.Dropdown(id='host', clearable=False, searchable=False, value='6cb1b8e43a19bdb3950a118a36af3452', options=[
-            {'label': 'sensor '+str(index+1), 'value': row} for index, row in df_host['host'].iteritems()
-        ]),
+        html.Div([
+            dcc.Dropdown(id='host', clearable=False, searchable=False, value='6cb1b8e43a19bdb3950a118a36af3452', options=[
+                {'label': 'Sensor '+str(index+1), 'value': row} for index, row in df_host['host'].iteritems()
+            ]),
+            dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
+                {'label': '10 minutes', 'value': '10m'},
+                {'label': '30 minutes', 'value': '30m'},
+                {'label': '1 hour',     'value': '1h'},
+                {'label': '1 day',      'value': '24h'},
+                {'label': '7 days',     'value': '7d'},
+                {'label': '30 days',    'value': '30d'},
+            ]),
+            html.Div([
+                html.Button(html.Div([
+                    html.Img(src='assets/download.svg'),
+                    'Export as CSV',
+                ]), id='export'),
+                dcc.Download(id='download'),
+            ]),
+        ], id='controls'),
 
         html.Div([
             dcc.Graph(id='co2_graph'),
@@ -70,7 +77,6 @@ def serve_layout():
             dcc.Graph(id='humidity_graph'),
             dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
             html.Div(id='timezone', hidden=True),
-            html.Div([html.Button('Export as CSV', id='export'), dcc.Download(id='download')]),
         ]),
     ])
 
