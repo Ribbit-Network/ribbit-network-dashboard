@@ -1,6 +1,3 @@
-from dash.dependencies import Output, Input
-from influxdb_client import InfluxDBClient, Point, Dialect
-
 import csv
 import dash
 import dash_core_components as dcc
@@ -9,19 +6,19 @@ import dash_table
 import os
 import plotly.express as px
 import plotly.graph_objects as go
-import plotly.express as px
+
+from dash.dependencies import Output, Input
+from influxdb_client import InfluxDBClient, Point, Dialect
 
 # Dash App
 app = dash.Dash(__name__, title='Ribbit Network')
 server = app.server
 
 # Connect to InfluxDB
-client = InfluxDBClient.from_config_file("influx_config.ini")
+client = InfluxDBClient.from_config_file('influx_config.ini')
 query_api = client.query_api()
 
-
 def get_influxdb_data(duration, host):
-    ## Query data as pandas dataframe
     df = query_api.query_data_frame('from(bucket:"co2")'
                                     f'|> range(start: -{duration})'
                                     f'|> filter(fn: (r) => r.host == "{host}")'
@@ -32,10 +29,10 @@ def get_influxdb_data(duration, host):
     return df.drop(['result', 'table'], axis=1)
 
 def serve_layout():
-    df_host = query_api.query_data_frame('from(bucket:"co2") '
-                                         '|> range(start:-15m) '
-                                         '|> limit(n:1) '
-                                         '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
+    df_host = query_api.query_data_frame('from(bucket:"co2")'
+                                         '|> range(start:-15m)'
+                                         '|> limit(n:1)'
+                                         '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
                                          '|> keep(columns: ["host"])')
 
     return html.Div([
@@ -50,7 +47,7 @@ def serve_layout():
         dcc.Graph(id='map'),
 
         html.Div([
-            dcc.Dropdown(id='host', clearable=False, searchable=False, value='6cb1b8e43a19bdb3950a118a36af3452', options=[
+            dcc.Dropdown(id='host', clearable=False, searchable=False, value=df_host['host'][0], options=[
                 {'label': 'Sensor '+str(index+1), 'value': row} for index, row in df_host['host'].iteritems()
             ]),
             dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
@@ -96,7 +93,7 @@ app.clientside_callback(
 # Update the Map
 @app.callback(Output('map', 'figure'), [Input('onload', 'children'), Input('interval', 'n_intervals')])
 def update_map(children, n_intervals):
-     # Only get the latest point for displaying on the map
+    # Only get the latest point for displaying on the map
     map_df = query_api.query_data_frame('from(bucket:"co2") '
                                         '|> range(start:-15m) '
                                         '|> limit(n:1) '
@@ -106,15 +103,15 @@ def update_map(children, n_intervals):
     map_fig = go.Figure(data=go.Scattermapbox(
         lon=map_df['lon'],
         lat=map_df['lat'],
-        text='CO₂: '+map_df['co2'].round(decimals=2).astype('str'),
+        text='CO₂: '+map_df['co2'].round(decimals=2).astype('str')+' PPM',
         mode='markers',
-        marker=dict(color=map_df['co2'], size=18, showscale = True, cmin=300, cmax = 600)
+        marker=dict(color=map_df['co2'], size=18, showscale=True, cmin=300, cmax=600),
+        # Preserve the Map state accross updates (zoom level, selections, etc)
+        # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
+        uirevision="dataset",
     ))
-    map_fig.update_layout(mapbox_style="carto-positron")
-    map_fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    # Preserve the Map state accross updates (zoom level, selections, etc)
-    # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
-    map_fig.update_layout(uirevision="dataset")
+
+    map_fig.update_layout(mapbox_style='carto-positron', margin={'r': 0, 't': 0, 'l': 0, 'b': 0})
 
     return map_fig
 
