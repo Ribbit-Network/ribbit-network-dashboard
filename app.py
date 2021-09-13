@@ -3,52 +3,38 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
+import db
 import os
 import plotly.express as px
 import plotly.graph_objects as go
 
 from dash.dependencies import Output, Input
-from influxdb_client import InfluxDBClient, Point, Dialect
+
+TITLE = 'Ribbit Network'
+REFRESH_MS = 60 * 1000
 
 # Dash App
-app = dash.Dash(__name__, title='Ribbit Network')
+app = dash.Dash(__name__, title=TITLE)
 server = app.server
 
-# Connect to InfluxDB
-client = InfluxDBClient.from_config_file('influx_config.ini')
-query_api = client.query_api()
-
-def get_influxdb_data(duration, host):
-    df = query_api.query_data_frame('from(bucket:"co2")'
-                                    f'|> range(start: -{duration})'
-                                    f'|> filter(fn: (r) => r.host == "{host}")'
-                                    '|> aggregateWindow(every: 1m, fn: mean, createEmpty: false)'
-                                    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
-                                    '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time", "baro_pressure"])')
-
-    return df.drop(['result', 'table'], axis=1)
-
 def serve_layout():
-    df_host = query_api.query_data_frame('from(bucket:"co2")'
-                                         '|> range(start:-15m)'
-                                         '|> limit(n:1)'
-                                         '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
-                                         '|> keep(columns: ["host"])')
+    sensor_ids = db.get_sensor_ids()
 
     return html.Div([
         html.Div(id='onload', hidden=True),
+        dcc.Interval(id='interval', interval=REFRESH_MS, n_intervals=0),
 
         html.Div([
             html.Img(src='assets/frog.svg'),
-            html.H1('Ribbit Network'),
+            html.H1(TITLE),
             html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'none', 'color': 'black'}),
         ], id='nav'),
 
         dcc.Graph(id='map'),
 
         html.Div([
-            dcc.Dropdown(id='host', clearable=False, searchable=False, value=df_host['host'][0], options=[
-                {'label': 'Sensor '+str(index+1), 'value': row} for index, row in df_host['host'].iteritems()
+            dcc.Dropdown(id='host', clearable=False, searchable=False, value=sensor_ids[0], options=[
+                {'label': 'Sensor '+str(i+1), 'value': sensor_id} for i, sensor_id in sensor_ids.iteritems()
             ]),
             dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
                 {'label': '10 minutes', 'value': '10m'},
@@ -72,7 +58,6 @@ def serve_layout():
             dcc.Graph(id='temp_graph'),
             dcc.Graph(id='baro_graph'),
             dcc.Graph(id='humidity_graph'),
-            dcc.Interval(id='interval', interval=60*1000, n_intervals=0),
             html.Div(id='timezone', hidden=True),
         ]),
     ])
@@ -91,24 +76,25 @@ app.clientside_callback(
 )
 
 # Update the Map
-@app.callback(Output('map', 'figure'), [Input('onload', 'children'), Input('interval', 'n_intervals')])
+@app.callback(
+    Output('map', 'figure'),
+    [
+        Input('onload', 'children'),
+        Input('interval', 'n_intervals'),
+    ],
+)
 def update_map(children, n_intervals):
-    # Only get the latest point for displaying on the map
-    map_df = query_api.query_data_frame('from(bucket:"co2") '
-                                        '|> range(start:-15m) '
-                                        '|> limit(n:1) '
-                                        '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
-                                        '|> keep(columns: ["co2", "lat", "lon"])')
+    df = db.get_map_data()
 
     map_fig = go.Figure(data=go.Scattermapbox(
-        lon=map_df['lon'],
-        lat=map_df['lat'],
-        text='CO₂: '+map_df['co2'].round(decimals=2).astype('str')+' PPM',
+        lon=df['lon'],
+        lat=df['lat'],
+        text='CO₂: '+df['co2'].round(decimals=2).astype('str')+' PPM',
         mode='markers',
-        marker=dict(color=map_df['co2'], size=18, showscale=True, cmin=300, cmax=600),
+        marker=dict(color=df['co2'], size=16, showscale=True, cmin=300, cmax=600),
         # Preserve the Map state accross updates (zoom level, selections, etc)
         # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
-        uirevision="dataset",
+        uirevision='dataset',
     ))
 
     map_fig.update_layout(mapbox_style='carto-positron', margin={'r': 0, 't': 0, 'l': 0, 'b': 0})
@@ -129,7 +115,7 @@ def update_map(children, n_intervals):
     ],
 )
 def update_graphs(timezone, duration, host, n_intervals):
-    df = get_influxdb_data(duration, host)
+    df = db.get_sensor_data(host, duration)
     df.rename(columns = {'_time':'Time', 'co2':'CO₂ (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 
                          'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (°C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
     df['Time'] = df['Time'].dt.tz_convert(timezone)
@@ -144,11 +130,18 @@ def update_graphs(timezone, duration, host, n_intervals):
     return co2_line, temp_line, baro_line, humidity_line
 
 # Export data as CSV
-@app.callback(Output('download', 'data'), [Input('export', 'n_clicks'), Input('duration', 'value'), Input('host', 'value')])
+@app.callback(
+    Output('download', 'data'),
+    [
+        Input('export', 'n_clicks'),
+        Input('duration', 'value'),
+        Input('host', 'value'),
+    ],
+)
 def export_data(n_clicks, duration, host):
     if n_clicks == None:
         return
-    df = get_influxdb_data(duration, host)
+    df = db.get_sensor_data(host, duration)
     df.columns = ['Timestamp', 'Altitude (m)', 'CO₂ (PPM)', 'Humidity (%)', 'Latitude', 'Longitude', 'Barometric Pressure (mBar)', 'Temperature (°C)']
     return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
 
