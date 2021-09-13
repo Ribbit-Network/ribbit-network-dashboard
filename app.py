@@ -73,7 +73,7 @@ def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes
     # in their plotly-functions associated with mapbox, such as go.Densitymapbox() etc.
 
     Returns the appropriate zoom-level for these plotly-mapbox-graphics along with
-    the center coordinate tuple of all provided coordinate tuples.
+    the center coordinates of all provided coordinate tuples.
     """
 
     # Check whether both latitudes and longitudes have been passed,
