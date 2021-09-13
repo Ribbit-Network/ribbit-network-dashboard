@@ -4,6 +4,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 import db
+import numpy as np
 import os
 import plotly.express as px
 import plotly.graph_objects as go
@@ -62,6 +63,49 @@ def serve_layout():
         ]),
     ])
 
+def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=None, latitudes=None):
+    """Function documentation:\n
+    Basic framework adopted from Krichardson under the following thread:
+    https://community.plotly.com/t/dynamic-zoom-for-mapbox/32658/7
+
+    # NOTE:
+    # THIS IS A TEMPORARY SOLUTION UNTIL THE DASH TEAM IMPLEMENTS DYNAMIC ZOOM
+    # in their plotly-functions associated with mapbox, such as go.Densitymapbox() etc.
+
+    Returns the appropriate zoom-level for these plotly-mapbox-graphics along with
+    the center coordinate tuple of all provided coordinate tuples.
+    """
+
+    # Check whether both latitudes and longitudes have been passed,
+    # or if the list lenghts don't match
+    if ((latitudes is None or longitudes is None)
+            or (len(latitudes) != len(longitudes))):
+        # Otherwise, return the default values of 0 zoom and the coordinate origin as center point
+        return 0, (0, 0)
+
+    # Get the boundary-box 
+    b_box = {} 
+    b_box['height'] = latitudes.max()-latitudes.min()
+    b_box['width'] = longitudes.max()-longitudes.min()
+    b_box['center_lat'] = np.mean(latitudes)
+    b_box['center_lon'] = np.mean(longitudes)
+
+    # get the area of the bounding box in order to calculate a zoom-level
+    area = b_box['height'] * b_box['width']
+
+    # * 1D-linear interpolation with numpy:
+    # - Pass the area as the only x-value and not as a list, in order to return a scalar as well
+    # - The x-points "xp" should be in parts in comparable order of magnitude of the given area
+    # - The zpom-levels are adapted to the areas, i.e. start with the smallest area possible of 0
+    # which leads to the highest possible zoom value 20, and so forth decreasing with increasing areas
+    # as these variables are antiproportional
+    zoom = np.interp(x=area,
+                     xp=[0,  5**-10, 4**-10, 3**-10, 2**-10, 1**-10, 1**-5],
+                     fp=[20, 15,     14,     13,     11,     6,      4])
+
+    # Finally, return the zoom level and the associated boundary-box center coordinates
+    return zoom, b_box['center_lat'], b_box['center_lon']
+
 app.layout = serve_layout
 
 # Get browser timezone
@@ -85,6 +129,7 @@ app.clientside_callback(
 )
 def update_map(children, n_intervals):
     df = db.get_map_data()
+    zoom, b_box_lat, b_box_lon = get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=df['lon'], latitudes=df['lat'])
 
     map_fig = go.Figure(data=go.Scattermapbox(
         lon=df['lon'],
@@ -94,10 +139,14 @@ def update_map(children, n_intervals):
         marker=dict(color=df['co2'], size=16, showscale=True, cmin=300, cmax=600),
         # Preserve the Map state accross updates (zoom level, selections, etc)
         # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
-        uirevision='dataset',
+        uirevision='dataset'
     ))
 
-    map_fig.update_layout(mapbox_style='carto-positron', margin={'r': 0, 't': 0, 'l': 0, 'b': 0})
+    map_fig.update_layout(mapbox_style='carto-positron',
+                          margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
+                          mapbox_zoom=zoom,
+                          mapbox_center_lat=b_box_lat,
+                          mapbox_center_lon=b_box_lon)
 
     return map_fig
 
