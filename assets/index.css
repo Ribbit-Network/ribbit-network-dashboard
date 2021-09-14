@@ -19,6 +19,28 @@ body {
     margin-right: 16px;
 }
 
+#map-container {
+    display: flex;
+    height: 400px;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+}
+
+#map-container #map {
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#map-container #loading {
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
 #controls {
     display: flex;
     margin: 16px;
