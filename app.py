@@ -31,7 +31,10 @@ def serve_layout():
             html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'none', 'color': 'black'}),
         ], id='nav'),
 
-        dcc.Graph(id='map'),
+        html.Div([
+            dcc.Graph(id='map'),
+            dcc.Loading(id='loading', children=[html.Div(id='loading-output')]),
+        ], id='map-container'),
 
         html.Div([
             dcc.Dropdown(id='host', clearable=False, searchable=False, value=sensor_ids[0], options=[
@@ -122,6 +125,7 @@ app.clientside_callback(
 # Update the Map
 @app.callback(
     Output('map', 'figure'),
+    Output('loading-output', 'children'),
     [
         Input('onload', 'children'),
         Input('interval', 'n_intervals'),
@@ -148,7 +152,7 @@ def update_map(children, n_intervals):
                           mapbox_center_lat=b_box_lat,
                           mapbox_center_lon=b_box_lon)
 
-    return map_fig
+    return map_fig, True
 
 # Update Data Plots
 @app.callback(
