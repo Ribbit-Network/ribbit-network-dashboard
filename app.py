@@ -140,7 +140,6 @@ def update_map(children, n_intervals):
         lat=df['lat'],
         text='CO₂: '+df['co2'].round(decimals=2).astype('str')+' PPM',
         mode='markers',
-        meta = df['host'],
         marker=dict(color=df['co2'], size=16, showscale=True, cmin=300, cmax=600),
         # Preserve the Map state accross updates (zoom level, selections, etc)
         # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
@@ -151,8 +150,7 @@ def update_map(children, n_intervals):
                           margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
                           mapbox_zoom=zoom,
                           mapbox_center_lat=b_box_lat,
-                          mapbox_center_lon=b_box_lon,
-                          clickmode='event+select')
+                          mapbox_center_lon=b_box_lon)
 
     return map_fig, True
 
@@ -200,15 +198,6 @@ def export_data(n_clicks, duration, host):
     df.columns = ['Timestamp', 'Altitude (m)', 'CO₂ (PPM)', 'Humidity (%)', 'Latitude', 'Longitude', 'Barometric Pressure (mBar)', 'Temperature (°C)']
     return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
 
-
-@app.callback(
-    Output('host', 'value'),
-    [Input('map', 'clickData')]
-)
-def testing(clickData):
-    if clickData is not None:
-        clicked_host = clickData['points'][0]['meta']
-        return clicked_host
 
 if __name__ == '__main__':
     app.run_server(debug=True)

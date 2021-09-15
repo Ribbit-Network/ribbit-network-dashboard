@@ -16,7 +16,7 @@ def get_map_data():
                                       '|> range(start:-15m) '
                                       '|> limit(n:1) '
                                       '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
-                                      '|> keep(columns: ["co2", "host", "lat", "lon"])')
+                                      '|> keep(columns: ["co2", "lat", "lon"])')
 
 def get_sensor_data(host, duration):
     df = query_api.query_data_frame('from(bucket:"co2")'
