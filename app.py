@@ -1,4 +1,6 @@
 import csv
+import time
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -58,6 +60,7 @@ def serve_layout():
         ], id='controls'),
 
         html.Div([
+            dcc.Loading(id="load", children=[html.Div(id="load_output")], type="default"),
             dcc.Graph(id='co2_graph'),
             dcc.Graph(id='temp_graph'),
             dcc.Graph(id='baro_graph'),
@@ -65,6 +68,11 @@ def serve_layout():
             html.Div(id='timezone', hidden=True),
         ]),
     ])
+
+@app.callback(Output("load_output", "children"), Input("duration", "value"))
+def input_triggers_spinner(value):
+    time.sleep(1.5)
+    return value
 
 def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=None, latitudes=None):
     """Function documentation:\n
