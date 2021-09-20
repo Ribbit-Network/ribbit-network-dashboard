@@ -72,3 +72,14 @@ body {
     margin: 0 4px 1px 0;
     vertical-align: middle;
 }
+
+#graphs [data-dash-is-loading="true"]{
+    visibility: hidden;
+}
+#graphs [data-dash-is-loading="true"]::before{
+    content: url("https://mir-s3-cdn-cf.behance.net/project_modules/disp/35771931234507.564a1d2403b3a.gif");
+    display: inline-block;
+    color: green;
+    visibility: visible;
+    height: 16px;
+}

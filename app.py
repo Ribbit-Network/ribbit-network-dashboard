@@ -1,4 +1,5 @@
 import csv
+import time
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -63,7 +64,9 @@ def serve_layout():
             dcc.Graph(id='baro_graph'),
             dcc.Graph(id='humidity_graph'),
             html.Div(id='timezone', hidden=True),
-        ]),
+            dcc.Loading(id='loading-graphs-2', children=[html.Div(id='output-1')]),
+            # dcc.Loading(id='loading-graphs', children=[html.Div(id='loading-output-graphs')])
+        ], id='graphs'),
     ])
 
 def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=None, latitudes=None):
@@ -80,7 +83,7 @@ def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes
     """
 
     # Check whether both latitudes and longitudes have been passed,
-    # or if the list lenghts don't match
+    # or if the list lengths don't match
     if ((latitudes is None or longitudes is None)
             or (len(latitudes) != len(longitudes))):
         # Otherwise, return the default values of 0 zoom and the coordinate origin as center point
@@ -99,9 +102,9 @@ def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes
     # * 1D-linear interpolation with numpy:
     # - Pass the area as the only x-value and not as a list, in order to return a scalar as well
     # - The x-points "xp" should be in parts in comparable order of magnitude of the given area
-    # - The zpom-levels are adapted to the areas, i.e. start with the smallest area possible of 0
+    # - The zoom-levels are adapted to the areas, i.e. start with the smallest area possible of 0
     # which leads to the highest possible zoom value 20, and so forth decreasing with increasing areas
-    # as these variables are antiproportional
+    # as these variables are anti-proportional
     zoom = np.interp(x=area,
                      xp=[0,  5**-10, 4**-10, 3**-10, 2**-10, 1**-10, 1**-5],
                      fp=[20, 15,     14,     13,     11,     6,      4])
@@ -160,6 +163,7 @@ def update_map(children, n_intervals):
     Output('temp_graph', 'figure'),
     Output('baro_graph', 'figure'),
     Output('humidity_graph', 'figure'),
+    # Output('loading-output-graphs', 'children'),
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
