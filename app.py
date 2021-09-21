@@ -199,7 +199,8 @@ def export_data(n_clicks, duration, host):
     if n_clicks == None:
         return
     df = db.get_sensor_data(host, duration)
-    df.columns = ['Timestamp', 'Altitude (m)', 'CO₂ (PPM)', 'Humidity (%)', 'Latitude', 'Longitude', 'Barometric Pressure (mBar)', 'Temperature (°C)']
+    df.rename(columns = {'_time':'Time', 'co2':'CO2 (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 
+                     'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
     return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
 
 
