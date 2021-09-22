@@ -12,11 +12,12 @@ def get_sensor_ids():
     return df['host']
 
 def get_map_data():
-    return query_api.query_data_frame('from(bucket:"co2") '
+    df = query_api.query_data_frame('from(bucket:"co2") '
                                       '|> range(start:-15m) '
                                       '|> limit(n:1) '
                                       '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value") '
                                       '|> keep(columns: ["co2", "lat", "lon"])')
+    return df.drop(['result', 'table'], axis=1)
 
 def get_sensor_data(host, duration):
     df = query_api.query_data_frame('from(bucket:"co2")'
@@ -25,6 +26,5 @@ def get_sensor_data(host, duration):
                                     '|> aggregateWindow(every: 1m, fn: mean, createEmpty: false)'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
                                     '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time", "baro_pressure"])')
-
     return df.drop(['result', 'table'], axis=1)
 
