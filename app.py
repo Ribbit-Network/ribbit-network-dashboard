@@ -3,6 +3,8 @@ import time
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_leaflet as dl
+import dash_leaflet.express as dlx
 import dash_table
 import db
 import numpy as np
@@ -11,16 +13,23 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from dash.dependencies import Output, Input
+from dash_extensions.javascript import assign
 
 TITLE = 'Ribbit Network'
 REFRESH_MS = 60 * 1000
 
+chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"
+colorscale = ['blue', 'purple', 'red', 'orange', 'yellow']
+
 # Dash App
-app = dash.Dash(__name__, title=TITLE)
+app = dash.Dash(__name__, title=TITLE, external_scripts=[chroma])
 server = app.server
 
 def serve_layout():
     sensor_ids = db.get_sensor_ids()
+
+    df = db.get_map_data()
+    zoom, b_box_lat, b_box_lon = get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=df['lon'], latitudes=df['lat'])
 
     return html.Div([
         html.Div(id='onload', hidden=True),
@@ -33,7 +42,17 @@ def serve_layout():
         ], id='nav'),
 
         html.Div([
-            dcc.Graph(id='map'),
+            dl.Map(
+                [
+                    dl.TileLayer(),
+                    dl.GeoJSON(id='geojson'),
+                    dl.Colorbar(colorscale=colorscale, width=20, height=200, min=300, max=600, unit='PPM'),
+                    dl.GestureHandling(),
+                ],
+                id='map',
+                center=(b_box_lat, b_box_lon),
+                zoom=zoom,
+            ),
             dcc.Loading(id='loading', children=[html.Div(id='loading-output')]),
         ], id='map-container'),
 
@@ -125,9 +144,16 @@ app.clientside_callback(
     Input('onload', 'children'),
 )
 
+point_to_layer = assign("""function(feature, latlng, context){
+    const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
+    const csc = chroma.scale(colorscale).domain([min, max]);
+    circleOptions.fillColor = csc(feature.properties[colorProp]);
+    return L.circleMarker(latlng, circleOptions);
+}""")
+
 # Update the Map
 @app.callback(
-    Output('map', 'figure'),
+    Output('geojson', 'children'),
     Output('loading-output', 'children'),
     [
         Input('onload', 'children'),
@@ -136,26 +162,16 @@ app.clientside_callback(
 )
 def update_map(children, n_intervals):
     df = db.get_map_data()
-    zoom, b_box_lat, b_box_lon = get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=df['lon'], latitudes=df['lat'])
+    df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM'
 
-    map_fig = go.Figure(data=go.Scattermapbox(
-        lon=df['lon'],
-        lat=df['lat'],
-        text='CO₂: '+df['co2'].round(decimals=2).astype('str')+' PPM',
-        mode='markers',
-        marker=dict(color=df['co2'], size=16, showscale=True, cmin=300, cmax=600),
-        # Preserve the Map state accross updates (zoom level, selections, etc)
-        # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
-        uirevision='dataset'
-    ))
-
-    map_fig.update_layout(mapbox_style='carto-positron',
-                          margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
-                          mapbox_zoom=zoom,
-                          mapbox_center_lat=b_box_lat,
-                          mapbox_center_lon=b_box_lon)
-
-    return map_fig, True
+    return dl.GeoJSON(
+        data=dlx.dicts_to_geojson(df.to_dict('records')),
+        options=dict(pointToLayer=point_to_layer),
+        cluster=True,
+        zoomToBoundsOnClick=True,
+        superClusterOptions={"radius": 100},
+        hideout=dict(colorProp='co2', circleOptions=dict(fillOpacity=1, stroke=False, radius=8), min=300, max=600, colorscale=colorscale),
+    ), True
 
 # Update Data Plots
 @app.callback(
