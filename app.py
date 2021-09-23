@@ -1,16 +1,15 @@
 import csv
-import time
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
-import dash_table
 import db
 import numpy as np
 import os
 import plotly.express as px
 import plotly.graph_objects as go
+import time
 
 from dash.dependencies import Output, Input
 from dash_extensions.javascript import assign
@@ -18,8 +17,8 @@ from dash_extensions.javascript import assign
 TITLE = 'Ribbit Network'
 REFRESH_MS = 60 * 1000
 
-chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"
-colorscale = ['blue', 'purple', 'red', 'orange', 'yellow']
+chroma = 'https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js'
+colorscale = ['lightgreen', 'green', 'darkgreen', 'black']
 
 # Dash App
 app = dash.Dash(__name__, title=TITLE, external_scripts=[chroma])
@@ -44,16 +43,14 @@ def serve_layout():
         html.Div([
             dl.Map(
                 [
-                    dl.TileLayer(),
+                    dl.TileLayer(url='https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', attribution='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'),
                     dl.GeoJSON(id='geojson'),
-                    dl.Colorbar(colorscale=colorscale, width=20, height=200, min=300, max=600, unit='PPM'),
                     dl.GestureHandling(),
                 ],
                 id='map',
                 center=(b_box_lat, b_box_lon),
                 zoom=zoom,
             ),
-            dcc.Loading(id='loading', children=[html.Div(id='loading-output')]),
         ], id='map-container'),
 
         html.Div([
@@ -83,23 +80,20 @@ def serve_layout():
             dcc.Graph(id='baro_graph'),
             dcc.Graph(id='humidity_graph'),
             html.Div(id='timezone', hidden=True),
-            dcc.Loading(id='loading-graphs-2', children=[html.Div(id='output-1')]),
-            # dcc.Loading(id='loading-graphs', children=[html.Div(id='loading-output-graphs')])
         ], id='graphs'),
     ])
 
 def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=None, latitudes=None):
-    """Function documentation:\n
+    '''
     Basic framework adopted from Krichardson under the following thread:
     https://community.plotly.com/t/dynamic-zoom-for-mapbox/32658/7
 
-    # NOTE:
-    # THIS IS A TEMPORARY SOLUTION UNTIL THE DASH TEAM IMPLEMENTS DYNAMIC ZOOM
+    # NOTE: THIS IS A TEMPORARY SOLUTION UNTIL THE DASH TEAM IMPLEMENTS DYNAMIC ZOOM
     # in their plotly-functions associated with mapbox, such as go.Densitymapbox() etc.
 
     Returns the appropriate zoom-level for these plotly-mapbox-graphics along with
     the center coordinates of all provided coordinate tuples.
-    """
+    '''
 
     # Check whether both latitudes and longitudes have been passed,
     # or if the list lengths don't match
@@ -144,17 +138,16 @@ app.clientside_callback(
     Input('onload', 'children'),
 )
 
-point_to_layer = assign("""function(feature, latlng, context){
+point_to_layer = assign('''function(feature, latlng, context) {
     const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
     const csc = chroma.scale(colorscale).domain([min, max]);
     circleOptions.fillColor = csc(feature.properties[colorProp]);
     return L.circleMarker(latlng, circleOptions);
-}""")
+}''')
 
 # Update the Map
 @app.callback(
     Output('geojson', 'children'),
-    Output('loading-output', 'children'),
     [
         Input('onload', 'children'),
         Input('interval', 'n_intervals'),
@@ -169,7 +162,7 @@ def update_map(children, n_intervals):
         options=dict(pointToLayer=point_to_layer),
         cluster=True,
         zoomToBoundsOnClick=True,
-        superClusterOptions={"radius": 100},
+        superClusterOptions={'radius': 100},
         hideout=dict(colorProp='co2', circleOptions=dict(fillOpacity=1, stroke=False, radius=8), min=300, max=600, colorscale=colorscale),
     ), True
 
@@ -179,7 +172,6 @@ def update_map(children, n_intervals):
     Output('temp_graph', 'figure'),
     Output('baro_graph', 'figure'),
     Output('humidity_graph', 'figure'),
-    # Output('loading-output-graphs', 'children'),
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
@@ -189,18 +181,15 @@ def update_map(children, n_intervals):
 )
 def update_graphs(timezone, duration, host, n_intervals):
     df = db.get_sensor_data(host, duration)
-    df.rename(columns = {'_time':'Time', 'co2':'CO₂ (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 
-                         'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (°C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
+    df.rename(columns = {'_time':'Time', 'co2':'CO₂ (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (°C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
     df['Time'] = df['Time'].dt.tz_convert(timezone)
-    co2_line = px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'],
-                       template='plotly_white', render_mode='svg', hover_data = {'CO₂ (PPM)':':.2f'})
-    temp_line = px.line(df, x='Time', y='Temperature (°C)', color_discrete_sequence=['black'], 
-                        template='plotly_white', render_mode='svg', hover_data = {'Temperature (°C)':':.2f'})
-    baro_line = px.line(df, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'],
-                        template='plotly_white', render_mode='svg', hover_data = {'Barometric Pressure (mBar)':':.2f'})
-    humidity_line = px.line(df, x='Time', y='Humidity (%)', color_discrete_sequence=['black'],
-                            template='plotly_white', render_mode='svg', hover_data = {'Humidity (%)':':.2f'})
-    return co2_line, temp_line, baro_line, humidity_line
+
+    return (
+        px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg', hover_data = {'CO₂ (PPM)':':.2f'}),
+        px.line(df, x='Time', y='Temperature (°C)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg', hover_data = {'Temperature (°C)':':.2f'}),
+        px.line(df, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg', hover_data = {'Barometric Pressure (mBar)':':.2f'}),
+        px.line(df, x='Time', y='Humidity (%)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg', hover_data = {'Humidity (%)':':.2f'}),
+    )
 
 # Export data as CSV
 @app.callback(
@@ -215,10 +204,9 @@ def export_data(n_clicks, duration, host):
     if n_clicks == None:
         return
     df = db.get_sensor_data(host, duration)
-    df.rename(columns = {'_time':'Time', 'co2':'CO2 (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 
-                     'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
+    df.rename(columns = {'_time':'Time', 'co2':'CO2 (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
     return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
