@@ -37,7 +37,10 @@ def serve_layout():
         html.Div([
             html.Img(src='assets/frog.svg'),
             html.H1(TITLE),
-            html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'none', 'color': 'black'}),
+            html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'underline', 'color': 'black'}),
+            html.A(html.H3('Build Your Sensor'), href='https://github.com/Ribbit-Network/ribbit-network-frog-sensor#build-a-frog', style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
+            html.A(html.H3('Get Your Sensor'), href='https://ribbitnetwork.org/#buy', style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
+            html.A(html.H3('Support'), href='https://ko-fi.com/keenanjohnson', style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
         ], id='nav'),
 
         html.Div([
