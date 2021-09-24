@@ -45,6 +45,7 @@ def serve_layout():
                 [
                     dl.TileLayer(url='https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', attribution='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'),
                     dl.GeoJSON(id='geojson'),
+                    dl.Colorbar(colorscale=colorscale, width=20, height=200, min=300, max=600, unit='PPM'),
                     dl.GestureHandling(),
                 ],
                 id='map',
