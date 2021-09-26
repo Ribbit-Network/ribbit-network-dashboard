@@ -242,7 +242,7 @@ def update_graphs(timezone, duration, host, _n_intervals):
     ],
 )
 def export_data(n_clicks, duration, host):
-    if n_clicks == None:
+    if n_clicks is None:
         return
     df = db.get_sensor_data(host, duration)
     df.rename(
