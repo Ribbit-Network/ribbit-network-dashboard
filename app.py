@@ -1,4 +1,3 @@
-import csv
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -6,10 +5,7 @@ import dash_leaflet as dl
 import dash_leaflet.express as dlx
 import db
 import numpy as np
-import os
 import plotly.express as px
-import plotly.graph_objects as go
-import time
 
 from dash.dependencies import Output, Input
 from dash_extensions.javascript import assign
@@ -21,14 +17,16 @@ chroma = 'https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js'
 colorscale = ['lightgreen', 'green', 'darkgreen', 'black']
 
 # Dash App
-app = dash.Dash(__name__, title=TITLE, external_scripts=[chroma])
+app = dash.Dash(__name__, title=TITLE, update_title=None, external_scripts=[chroma])
 server = app.server
+
 
 def serve_layout():
     sensor_ids = db.get_sensor_ids()
 
     df = db.get_map_data()
-    zoom, b_box_lat, b_box_lon = get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=df['lon'], latitudes=df['lat'])
+    zoom, b_box_lat, b_box_lon = get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=df['lon'],
+                                                                                                   latitudes=df['lat'])
 
     return html.Div([
         html.Div(id='onload', hidden=True),
@@ -37,15 +35,20 @@ def serve_layout():
         html.Div([
             html.Img(src='assets/frog.svg'),
             html.H1(TITLE),
-            html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/', style={'margin-left': 'auto', 'text-decoration': 'underline', 'color': 'black'}),
-            html.A(html.H3('Build Your Sensor'), href='https://github.com/Ribbit-Network/ribbit-network-frog-sensor#build-a-frog', style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
-            html.A(html.H3('Support'), href='https://ko-fi.com/keenanjohnson', style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
+            html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/',
+                   style={'margin-left': 'auto', 'text-decoration': 'underline', 'color': 'black'}),
+            html.A(html.H3('Build Your Sensor'),
+                   href='https://github.com/Ribbit-Network/ribbit-network-frog-sensor#build-a-frog',
+                   style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
+            html.A(html.H3('Support'), href='https://ko-fi.com/keenanjohnson',
+                   style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
         ], id='nav'),
 
         html.Div([
             dl.Map(
                 [
-                    dl.TileLayer(url='https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', attribution='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'),
+                    dl.TileLayer(url='https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
+                                 attribution='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'),
                     dl.GeoJSON(id='geojson'),
                     dl.Colorbar(colorscale=colorscale, width=20, height=200, min=300, max=600, unit='PPM'),
                     dl.GestureHandling(),
@@ -58,15 +61,15 @@ def serve_layout():
 
         html.Div([
             dcc.Dropdown(id='host', clearable=False, searchable=False, value=sensor_ids[0], options=[
-                {'label': 'Sensor '+str(i+1), 'value': sensor_id} for i, sensor_id in sensor_ids.iteritems()
+                {'label': 'Sensor ' + str(i + 1), 'value': sensor_id} for i, sensor_id in sensor_ids.iteritems()
             ]),
             dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
                 {'label': '10 minutes', 'value': '10m'},
                 {'label': '30 minutes', 'value': '30m'},
-                {'label': '1 hour',     'value': '1h'},
-                {'label': '1 day',      'value': '24h'},
-                {'label': '7 days',     'value': '7d'},
-                {'label': '30 days',    'value': '30d'},
+                {'label': '1 hour', 'value': '1h'},
+                {'label': '1 day', 'value': '24h'},
+                {'label': '7 days', 'value': '7d'},
+                {'label': '30 days', 'value': '30d'},
             ]),
             html.Div([
                 html.Button(html.Div([
@@ -86,8 +89,9 @@ def serve_layout():
         ], id='graphs'),
     ])
 
+
 def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=None, latitudes=None):
-    '''
+    """
     Basic framework adopted from Krichardson under the following thread:
     https://community.plotly.com/t/dynamic-zoom-for-mapbox/32658/7
 
@@ -96,7 +100,7 @@ def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes
 
     Returns the appropriate zoom-level for these plotly-mapbox-graphics along with
     the center coordinates of all provided coordinate tuples.
-    '''
+    """
 
     # Check whether both latitudes and longitudes have been passed,
     # or if the list lengths don't match
@@ -106,11 +110,12 @@ def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes
         return 0, (0, 0)
 
     # Get the boundary-box 
-    b_box = {} 
-    b_box['height'] = latitudes.max()-latitudes.min()
-    b_box['width'] = longitudes.max()-longitudes.min()
-    b_box['center_lat'] = np.mean(latitudes)
-    b_box['center_lon'] = np.mean(longitudes)
+    b_box = {
+        'height': latitudes.max() - latitudes.min(),
+        'width': longitudes.max() - longitudes.min(),
+        'center_lat': np.mean(latitudes),
+        'center_lon': np.mean(longitudes)
+    }
 
     # get the area of the bounding box in order to calculate a zoom-level
     area = b_box['height'] * b_box['width']
@@ -122,11 +127,12 @@ def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes
     # which leads to the highest possible zoom value 20, and so forth decreasing with increasing areas
     # as these variables are anti-proportional
     zoom = np.interp(x=area,
-                     xp=[0,  5**-10, 4**-10, 3**-10, 2**-10, 1**-10, 1**-5],
-                     fp=[20, 15,     14,     13,     11,     6,      4])
+                     xp=[0, 5 ** -10, 4 ** -10, 3 ** -10, 2 ** -10, 1 ** -10, 1 ** -5],
+                     fp=[20, 15, 14, 13, 11, 6, 4])
 
     # Finally, return the zoom level and the associated boundary-box center coordinates
     return zoom, b_box['center_lat'], b_box['center_lon']
+
 
 app.layout = serve_layout
 
@@ -148,6 +154,27 @@ point_to_layer = assign('''function(feature, latlng, context) {
     return L.circleMarker(latlng, circleOptions);
 }''')
 
+cluster_to_layer = assign('''function(feature, latlng, index, context) {
+    const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
+    const csc = chroma.scale(colorscale).domain([min, max]);
+    // Set color based on mean value of leaves.
+    const leaves = index.getLeaves(feature.properties.cluster_id);
+    let valueSum = 0;
+    for (let i = 0; i < leaves.length; ++i) {
+        valueSum += leaves[i].properties[colorProp]
+    }
+    const valueMean = valueSum / leaves.length;
+    // Render a circle with the number of leaves written in the center.
+    const icon = L.divIcon.scatter({
+        html: '<div style="background-color:white;"><span>' + feature.properties.point_count_abbreviated + '</span></div>',
+        className: "marker-cluster",
+        iconSize: L.point(40, 40),
+        color: csc(valueMean)
+    });
+    return L.marker(latlng, {icon : icon})
+}''')
+
+
 # Update the Map
 @app.callback(
     Output('geojson', 'children'),
@@ -156,7 +183,7 @@ point_to_layer = assign('''function(feature, latlng, context) {
         Input('interval', 'n_intervals'),
     ],
 )
-def update_map(children, n_intervals):
+def update_map(_children, _n_intervals):
     df = db.get_map_data()
     df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM'
 
@@ -164,10 +191,13 @@ def update_map(children, n_intervals):
         data=dlx.dicts_to_geojson(df.to_dict('records')),
         options=dict(pointToLayer=point_to_layer),
         cluster=True,
+        clusterToLayer=cluster_to_layer,
         zoomToBoundsOnClick=True,
-        superClusterOptions={'radius': 100},
-        hideout=dict(colorProp='co2', circleOptions=dict(fillOpacity=1, stroke=False, radius=8), min=300, max=600, colorscale=colorscale),
-    ), True
+        superClusterOptions=dict(radius=100),
+        hideout=dict(colorProp='co2', circleOptions=dict(fillOpacity=1, stroke=False, radius=8), min=300, max=600,
+                     colorscale=colorscale),
+    )
+
 
 # Update Data Plots
 @app.callback(
@@ -182,17 +212,25 @@ def update_map(children, n_intervals):
         Input('interval', 'n_intervals'),
     ],
 )
-def update_graphs(timezone, duration, host, n_intervals):
+def update_graphs(timezone, duration, host, _n_intervals):
     df = db.get_sensor_data(host, duration)
-    df.rename(columns = {'_time':'Time', 'co2':'CO₂ (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (°C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
+    df.rename(
+        columns={'_time': 'Time', 'co2': 'CO₂ (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
+                 'alt': 'Altitude (m)', 'temperature': 'Temperature (°C)',
+                 'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
     df['Time'] = df['Time'].dt.tz_convert(timezone)
 
     return (
-        px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg', hover_data = {'CO₂ (PPM)':':.2f'}),
-        px.line(df, x='Time', y='Temperature (°C)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg', hover_data = {'Temperature (°C)':':.2f'}),
-        px.line(df, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg', hover_data = {'Barometric Pressure (mBar)':':.2f'}),
-        px.line(df, x='Time', y='Humidity (%)', color_discrete_sequence=['black'], template='plotly_white', render_mode='svg', hover_data = {'Humidity (%)':':.2f'}),
+        px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white',
+                render_mode='svg', hover_data={'CO₂ (PPM)': ':.2f'}),
+        px.line(df, x='Time', y='Temperature (°C)', color_discrete_sequence=['black'], template='plotly_white',
+                render_mode='svg', hover_data={'Temperature (°C)': ':.2f'}),
+        px.line(df, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'],
+                template='plotly_white', render_mode='svg', hover_data={'Barometric Pressure (mBar)': ':.2f'}),
+        px.line(df, x='Time', y='Humidity (%)', color_discrete_sequence=['black'], template='plotly_white',
+                render_mode='svg', hover_data={'Humidity (%)': ':.2f'}),
     )
+
 
 # Export data as CSV
 @app.callback(
@@ -207,9 +245,12 @@ def export_data(n_clicks, duration, host):
     if n_clicks == None:
         return
     df = db.get_sensor_data(host, duration)
-    df.rename(columns = {'_time':'Time', 'co2':'CO2 (PPM)', 'humidity':'Humidity (%)', 'lat':'Latitude', 'lon':'Longitude','alt':'Altitude (m)','temperature':'Temperature (C)', 'baro_pressure':'Barometric Pressure (mBar)'}, inplace = True)
+    df.rename(
+        columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
+                 'alt': 'Altitude (m)', 'temperature': 'Temperature (C)',
+                 'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
     return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
