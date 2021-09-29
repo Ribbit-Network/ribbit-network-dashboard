@@ -5,6 +5,7 @@ import dash_leaflet as dl
 import dash_leaflet.express as dlx
 import db
 import numpy as np
+import pandas as pd
 import plotly.express as px
 
 from dash.dependencies import Output, Input
@@ -20,10 +21,10 @@ colorscale = ['lightgreen', 'green', 'darkgreen', 'black']
 app = dash.Dash(__name__, title=TITLE, update_title=None, external_scripts=[chroma])
 server = app.server
 
+sensor_data = pd.DataFrame(columns=['Time', 'CO₂ (PPM)', 'Temperature (°C)', 'Barometric Pressure (mBar)', 'Humidity (%)'])
+
 
 def serve_layout():
-    sensor_ids = db.get_sensor_ids()
-
     df = db.get_map_data()
     zoom, b_box_lat, b_box_lon = get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=df['lon'],
                                                                                                    latitudes=df['lat'])
@@ -60,9 +61,6 @@ def serve_layout():
         ], id='map-container'),
 
         html.Div([
-            dcc.Dropdown(id='host', clearable=False, searchable=False, value=sensor_ids[0], options=[
-                {'label': 'Sensor ' + str(i + 1), 'value': sensor_id} for i, sensor_id in sensor_ids.iteritems()
-            ]),
             dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
                 {'label': '10 minutes', 'value': '10m'},
                 {'label': '30 minutes', 'value': '30m'},
@@ -188,6 +186,7 @@ def update_map(_children, _n_intervals):
     df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM'
 
     return dl.GeoJSON(
+        id='geojson',
         data=dlx.dicts_to_geojson(df.to_dict('records')),
         options=dict(pointToLayer=point_to_layer),
         cluster=True,
@@ -208,48 +207,45 @@ def update_map(_children, _n_intervals):
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
-        Input('host', 'value'),
+        Input('geojson', 'click_feature'),
         Input('interval', 'n_intervals'),
     ],
 )
-def update_graphs(timezone, duration, host, _n_intervals):
-    df = db.get_sensor_data(host, duration)
-    df.rename(
-        columns={'_time': 'Time', 'co2': 'CO₂ (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
-                 'alt': 'Altitude (m)', 'temperature': 'Temperature (°C)',
-                 'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
-    df['Time'] = df['Time'].dt.tz_convert(timezone)
+def update_graphs(timezone, duration, click_feature, _n_intervals):
+    global sensor_data
+
+    if click_feature is not None:
+        sensor = click_feature.get('properties', {}).get('host', None)
+        if sensor is not None:
+            sensor_data = db.get_sensor_data(sensor, duration)
+            sensor_data.rename(
+                columns={'_time': 'Time', 'co2': 'CO₂ (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
+                         'alt': 'Altitude (m)', 'temperature': 'Temperature (°C)',
+                         'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
+            sensor_data['Time'] = sensor_data['Time'].dt.tz_convert(timezone)
 
     return (
-        px.line(df, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white',
-                render_mode='svg', hover_data={'CO₂ (PPM)': ':.2f'}),
-        px.line(df, x='Time', y='Temperature (°C)', color_discrete_sequence=['black'], template='plotly_white',
-                render_mode='svg', hover_data={'Temperature (°C)': ':.2f'}),
-        px.line(df, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'],
-                template='plotly_white', render_mode='svg', hover_data={'Barometric Pressure (mBar)': ':.2f'}),
-        px.line(df, x='Time', y='Humidity (%)', color_discrete_sequence=['black'], template='plotly_white',
-                render_mode='svg', hover_data={'Humidity (%)': ':.2f'}),
+       px.line(sensor_data, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white',
+               render_mode='svg', hover_data={'CO₂ (PPM)': ':.2f'}),
+       px.line(sensor_data, x='Time', y='Temperature (°C)', color_discrete_sequence=['black'], template='plotly_white',
+               render_mode='svg', hover_data={'Temperature (°C)': ':.2f'}),
+       px.line(sensor_data, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'],
+               template='plotly_white', render_mode='svg', hover_data={'Barometric Pressure (mBar)': ':.2f'}),
+       px.line(sensor_data, x='Time', y='Humidity (%)', color_discrete_sequence=['black'], template='plotly_white',
+               render_mode='svg', hover_data={'Humidity (%)': ':.2f'}),
     )
 
 
 # Export data as CSV
 @app.callback(
     Output('download', 'data'),
-    [
-        Input('export', 'n_clicks'),
-        Input('duration', 'value'),
-        Input('host', 'value'),
-    ],
+    Input('export', 'n_clicks'),
 )
-def export_data(n_clicks, duration, host):
-    if n_clicks is None:
+def export_data(n_clicks):
+    if n_clicks is None or sensor_data.empty:
         return
-    df = db.get_sensor_data(host, duration)
-    df.rename(
-        columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
-                 'alt': 'Altitude (m)', 'temperature': 'Temperature (C)',
-                 'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
-    return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
+
+    return dcc.send_data_frame(sensor_data.to_csv, index=False, filename='data.csv')
 
 
 if __name__ == '__main__':
