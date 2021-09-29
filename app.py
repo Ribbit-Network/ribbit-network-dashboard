@@ -240,23 +240,13 @@ def update_graphs(timezone, duration, click_feature, _n_intervals):
 # Export data as CSV
 @app.callback(
     Output('download', 'data'),
-    [
-        Input('export', 'n_clicks'),
-        Input('duration', 'value'),
-    ],
+    Input('export', 'n_clicks'),
 )
-def export_data(n_clicks, duration):
-    global host
-
-    if n_clicks is None or host is None:
+def export_data(n_clicks):
+    if n_clicks is None or sensor_data.empty:
         return
 
-    df = db.get_sensor_data(host, duration)
-    df.rename(
-        columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
-                 'alt': 'Altitude (m)', 'temperature': 'Temperature (C)',
-                 'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
-    return dcc.send_data_frame(df.to_csv, index=False, filename='data.csv')
+    return dcc.send_data_frame(sensor_data.to_csv, index=False, filename='data.csv')
 
 
 if __name__ == '__main__':
