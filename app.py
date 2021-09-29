@@ -21,7 +21,6 @@ colorscale = ['lightgreen', 'green', 'darkgreen', 'black']
 app = dash.Dash(__name__, title=TITLE, update_title=None, external_scripts=[chroma])
 server = app.server
 
-host = None
 sensor_data = pd.DataFrame(columns=['Time', 'CO₂ (PPM)', 'Temperature (°C)', 'Barometric Pressure (mBar)', 'Humidity (%)'])
 
 
@@ -213,12 +212,12 @@ def update_map(_children, _n_intervals):
     ],
 )
 def update_graphs(timezone, duration, click_feature, _n_intervals):
-    global host, sensor_data
+    global sensor_data
 
     if click_feature is not None:
-        host = click_feature.get('properties', {}).get('host', None)
-        if host is not None:
-            sensor_data = db.get_sensor_data(host, duration)
+        sensor = click_feature.get('properties', {}).get('host', None)
+        if sensor is not None:
+            sensor_data = db.get_sensor_data(sensor, duration)
             sensor_data.rename(
                 columns={'_time': 'Time', 'co2': 'CO₂ (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
                          'alt': 'Altitude (m)', 'temperature': 'Temperature (°C)',
