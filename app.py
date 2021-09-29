@@ -248,8 +248,9 @@ def update_graphs(timezone, duration, click_feature, _n_intervals):
 def export_data(n_clicks, duration):
     global host
 
-    if n_clicks is None:
+    if n_clicks is None or host is None:
         return
+
     df = db.get_sensor_data(host, duration)
     df.rename(
         columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',

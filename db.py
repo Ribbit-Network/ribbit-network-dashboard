@@ -16,15 +16,10 @@ def get_map_data():
 
 
 def get_sensor_data(host, duration):
-    query = 'from(bucket:"co2")'
-    query += f'|> range(start: -{duration})'
-
-    if host is not None:
-        query += f'|> filter(fn: (r) => r.host == "{host}")'
-
-    query += '|> aggregateWindow(every: 1m, fn: mean, createEmpty: false)'
-    query += '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
-    query += '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time", "baro_pressure"])'
-
-    df = query_api.query_data_frame(query)
+    df = query_api.query_data_frame('from(bucket:"co2")'
+                                    f'|> range(start: -{duration})'
+                                    f'|> filter(fn: (r) => r.host == "{host}")'
+                                    '|> aggregateWindow(every: 1m, fn: mean, createEmpty: false)'
+                                    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
+                                    '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time", "baro_pressure"])')
     return df.drop(['result', 'table'], axis=1)
