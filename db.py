@@ -6,7 +6,7 @@ client = InfluxDBClient.from_config_file('influx_config.ini')
 query_api = client.query_api()
 
 
-def get_map_data() -> list[pd.DataFrame]:
+def get_map_data() -> pd.DataFrame:
     df = query_api.query_data_frame('from(bucket:"co2")'
                                     '|> range(start:-15m)'
                                     '|> limit(n:1)'
