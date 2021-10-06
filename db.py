@@ -6,13 +6,16 @@ client = InfluxDBClient.from_config_file('influx_config.ini')
 query_api = client.query_api()
 
 
-def get_map_data():
+def get_map_data() -> list[pd.DataFrame]:
     df = query_api.query_data_frame('from(bucket:"co2")'
                                     '|> range(start:-15m)'
                                     '|> limit(n:1)'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
                                     '|> keep(columns: ["host", "lat", "lon", "co2"])')
-    return pd.concat(df)
+    if type(df) is list:
+        return pd.concat(df)
+    if type(df) is pd.DataFrame:
+        return df
 
 
 def get_sensor_data(host, duration):
