@@ -26,6 +26,16 @@
         "data",
         "doc"
       ]
+    },
+    {
+      "login": "spestana",
+      "name": "Steven Pestana",
+      "avatar_url": "https://avatars.githubusercontent.com/u/650301?v=4",
+      "profile": "https://spestana.github.io/",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
