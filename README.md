@@ -69,8 +69,8 @@ The [contributing guide](CONTRIBUTING.md) outlines the process for helping out!
 ## Background Information
 [See the Wiki for background research.](https://github.com/Ribbit-Network/ribbit-network-sensor/wiki/Background-Research) This project is inspired by some awesome research by incedible scientists in academia.
 
-## Developer
-Hi, I'm [Keenan](https://www.keenanjohnson.com/) and I work on this project! Reach out if you are interested or just want to chat.
+## Spoort
+Hi, I'm [Keenan](https://www.keenanjohnson.com/) and I moderate on this project! Reach out if you are interested or just want to chat.
 
 Consider sponsoring me on [Ko-fi](https://ko-fi.com/W7W14VTU8) or through [Github Sponsors](https://github.com/sponsors/keenanjohnson) to help cover the research and development costs.
 
