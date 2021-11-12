@@ -36,6 +36,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "Alhaji-trujillo",
+      "name": "Mujeeb A. Abdulfatai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/39748678?v=4",
+      "profile": "https://www.linkedin.com/in/mujeeb-a-abdulfatai-9b4498120/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
