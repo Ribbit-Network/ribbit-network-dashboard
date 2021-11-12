@@ -45,6 +45,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "rishikavikondala",
+      "name": "Rishi Kavikondala",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30443677?v=4",
+      "profile": "https://rishikavikondala.github.io",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
