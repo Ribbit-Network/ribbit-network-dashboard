@@ -1,0 +1,65 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "brianstrauch",
+      "name": "Brian Strauch",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7474900?v=4",
+      "profile": "http://brianstrauch.com",
+      "contributions": [
+        "code",
+        "design",
+        "ideas"
+      ]
+    },
+    {
+      "login": "yuzhang0302",
+      "name": "Yu Zhang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/89743882?v=4",
+      "profile": "https://github.com/yuzhang0302",
+      "contributions": [
+        "code",
+        "data",
+        "doc"
+      ]
+    },
+    {
+      "login": "spestana",
+      "name": "Steven Pestana",
+      "avatar_url": "https://avatars.githubusercontent.com/u/650301?v=4",
+      "profile": "https://spestana.github.io/",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "Alhaji-trujillo",
+      "name": "Mujeeb A. Abdulfatai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/39748678?v=4",
+      "profile": "https://www.linkedin.com/in/mujeeb-a-abdulfatai-9b4498120/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "rishikavikondala",
+      "name": "Rishi Kavikondala",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30443677?v=4",
+      "profile": "https://rishikavikondala.github.io",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "ribbit-network-dashboard",
+  "projectOwner": "Ribbit-Network",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

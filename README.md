@@ -1,4 +1,7 @@
 # Ribbit Network Dashboard
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 [This project will create the world's largest Greenhouse Gas Emissions dataset that will empower anyone to join in the work on climate and provide informed data for climate action.](https://ribbitnetwork.org/)
 
 Ribbit Network is a large network of open-source, low-cost, Greenhouse Gas (CO2 and possibly methane) Detection Sensors. These sensor units will be sold by the Ribbit Network and will upload their data to the cloud, creating the world's most complete Greenhouse Gas dataset.
@@ -18,6 +21,9 @@ This dashboard is in it's very earliest version and needs a lot of work.
 The first prototype sensors are up and running in Seattle. [Here is the deployed version of this repo which shows the current live sensor data](https://ribbit-network.herokuapp.com/) (Note this dashboard is still experimental and may be down occasionally).
 
 ## Technical Details
+
+![Block Diagram](block_diagram.drawio.svg)
+
 The application is built as a [Dash app](https://plotly.com/dash/).
 
 It is currently automatically deployed on [Heroku](https://dashboard.heroku.com/) from this repository.
@@ -63,9 +69,33 @@ The [contributing guide](CONTRIBUTING.md) outlines the process for helping out!
 ## Background Information
 [See the Wiki for background research.](https://github.com/Ribbit-Network/ribbit-network-sensor/wiki/Background-Research) This project is inspired by some awesome research by incedible scientists in academia.
 
-## Developer
-Hi, I'm [Keenan](https://www.keenanjohnson.com/) and I work on this project! Reach out if you are interested or just want to chat.
+## Spoort
+Hi, I'm [Keenan](https://www.keenanjohnson.com/) and I moderate on this project! Reach out if you are interested or just want to chat.
 
 Consider sponsoring me on [Ko-fi](https://ko-fi.com/W7W14VTU8) or through [Github Sponsors](https://github.com/sponsors/keenanjohnson) to help cover the research and development costs.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W14VTU8)
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="http://brianstrauch.com"><img src="https://avatars.githubusercontent.com/u/7474900?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Brian Strauch</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=brianstrauch" title="Code">💻</a> <a href="#design-brianstrauch" title="Design">🎨</a> <a href="#ideas-brianstrauch" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/yuzhang0302"><img src="https://avatars.githubusercontent.com/u/89743882?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yu Zhang</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=yuzhang0302" title="Code">💻</a> <a href="#data-yuzhang0302" title="Data">🔣</a> <a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=yuzhang0302" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://spestana.github.io/"><img src="https://avatars.githubusercontent.com/u/650301?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Steven Pestana</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/issues?q=author%3Aspestana" title="Bug reports">🐛</a> <a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=spestana" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/mujeeb-a-abdulfatai-9b4498120/"><img src="https://avatars.githubusercontent.com/u/39748678?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mujeeb A. Abdulfatai</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=Alhaji-trujillo" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://rishikavikondala.github.io"><img src="https://avatars.githubusercontent.com/u/30443677?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rishi Kavikondala</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=rishikavikondala" title="Code">💻</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
