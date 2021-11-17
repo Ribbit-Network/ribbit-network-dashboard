@@ -60,6 +60,8 @@ def serve_layout():
                 id='map',
                 center=(b_box_lat, b_box_lon),
                 zoom=zoom,
+                minZoom=3,
+                maxBounds=[[-75, -180],[75, 200]],
             ),
         ], id='map-container'),
 
