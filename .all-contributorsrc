@@ -54,6 +54,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "sriki18",
+      "name": "Srikiran Chandrasekaran",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7760814?v=4",
+      "profile": "https://github.com/sriki18",
+      "contributions": [
+        "code",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,
