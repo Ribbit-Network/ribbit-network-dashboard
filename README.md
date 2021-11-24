@@ -1,7 +1,7 @@
 # Ribbit Network Dashboard
 [![Chat](https://img.shields.io/discord/870113194289532969.svg?style=flat-square&colorB=758ED3)](https://discord.gg/vq8PkDb2TC)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [This project will create the world's largest Greenhouse Gas Emissions dataset that will empower anyone to join in the work on climate and provide informed data for climate action.](https://ribbitnetwork.org/)
 
@@ -91,6 +91,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://spestana.github.io/"><img src="https://avatars.githubusercontent.com/u/650301?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Steven Pestana</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/issues?q=author%3Aspestana" title="Bug reports">🐛</a> <a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=spestana" title="Code">💻</a></td>
     <td align="center"><a href="https://www.linkedin.com/in/mujeeb-a-abdulfatai-9b4498120/"><img src="https://avatars.githubusercontent.com/u/39748678?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mujeeb A. Abdulfatai</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=Alhaji-trujillo" title="Documentation">📖</a></td>
     <td align="center"><a href="https://rishikavikondala.github.io"><img src="https://avatars.githubusercontent.com/u/30443677?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rishi Kavikondala</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=rishikavikondala" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/sriki18"><img src="https://avatars.githubusercontent.com/u/7760814?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Srikiran Chandrasekaran</b></sub></a><br /><a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/commits?author=sriki18" title="Code">💻</a> <a href="https://github.com/Ribbit-Network/ribbit-network-dashboard/pulls?q=is%3Apr+reviewed-by%3Asriki18" title="Reviewed Pull Requests">👀</a></td>
   </tr>
 </table>
 
