@@ -11,6 +11,7 @@ def get_map_data():
                                     '|> range(start:-15m)'
                                     '|> limit(n:1)'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
+                                    '|> filter(fn: (r) => r.lat != 0 and r.lon != 0)'
                                     '|> keep(columns: ["host", "lat", "lon", "co2"])')
     return pd.concat(df)
 
