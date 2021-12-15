@@ -6,10 +6,11 @@ import dash_leaflet.express as dlx
 import db
 import numpy as np
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 
 from dash.dependencies import Output, Input
 from dash_extensions.javascript import assign
+from plotly.subplots import make_subplots
 
 TITLE = 'Ribbit Network'
 REFRESH_MS = 60 * 1000
@@ -34,10 +35,13 @@ def serve_layout():
         html.Div([
             html.Img(src='assets/frog.svg'),
             html.H1(TITLE),
-            html.A(html.H3('Learn More'), href='https://ribbitnetwork.org/',
+            html.A(html.H3('Learn'), href='https://ribbitnetwork.org/',
                    style={'margin-left': 'auto', 'text-decoration': 'underline', 'color': 'black'}),
-            html.A(html.H3('Build Your Sensor'),
+            html.A(html.H3('Build'),
                    href='https://github.com/Ribbit-Network/ribbit-network-frog-sensor#build-a-frog',
+                   style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
+            html.A(html.H3('Order'),
+                   href='https://ribbitnetwork.org/#buy',
                    style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
             html.A(html.H3('Support'), href='https://ko-fi.com/keenanjohnson',
                    style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
@@ -79,10 +83,7 @@ def serve_layout():
         ], id='controls'),
 
         html.Div([
-            dcc.Graph(id='co2_graph'),
-            dcc.Graph(id='temp_graph'),
-            dcc.Graph(id='baro_graph'),
-            dcc.Graph(id='humidity_graph'),
+            dcc.Graph(id='timeseries'),
             html.Div(id='timezone', hidden=True),
         ], id='graphs'),
     ])
@@ -155,10 +156,7 @@ def update_map(_children, _n_intervals):
 
 # Update Data Plots
 @app.callback(
-    Output('co2_graph', 'figure'),
-    Output('temp_graph', 'figure'),
-    Output('baro_graph', 'figure'),
-    Output('humidity_graph', 'figure'),
+    Output('timeseries', 'figure'),
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
@@ -179,16 +177,13 @@ def update_graphs(timezone, duration, click_feature, _n_intervals):
                          'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
             sensor_data['Time'] = sensor_data['Time'].dt.tz_convert(timezone)
 
-    return (
-       px.line(sensor_data, x='Time', y='CO₂ (PPM)', color_discrete_sequence=['black'], template='plotly_white',
-               render_mode='svg', hover_data={'CO₂ (PPM)': ':.2f'}),
-       px.line(sensor_data, x='Time', y='Temperature (°C)', color_discrete_sequence=['black'], template='plotly_white',
-               render_mode='svg', hover_data={'Temperature (°C)': ':.2f'}),
-       px.line(sensor_data, x='Time', y='Barometric Pressure (mBar)', color_discrete_sequence=['black'],
-               template='plotly_white', render_mode='svg', hover_data={'Barometric Pressure (mBar)': ':.2f'}),
-       px.line(sensor_data, x='Time', y='Humidity (%)', color_discrete_sequence=['black'], template='plotly_white',
-               render_mode='svg', hover_data={'Humidity (%)': ':.2f'}),
-    )
+    columns_to_plot = ['CO₂ (PPM)', 'Temperature (°C)', 'Barometric Pressure (mBar)', 'Humidity (%)']
+    fig = make_subplots(rows=4, cols=1, shared_xaxes=True)
+    for ind, col in enumerate(columns_to_plot):
+        fig.add_scatter(x=sensor_data["Time"], y=sensor_data[col], mode="lines", line=go.scatter.Line(color="black"), showlegend=False, row=ind+1, col=1, hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>", text=[col]*len(sensor_data[col]))
+        fig.update_yaxes(title_text=col, row=ind+1, col=1)
+    fig.update_layout(template="plotly_white", height=1200)
+    return fig
 
 
 # Export data as CSV

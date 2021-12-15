@@ -78,3 +78,7 @@ body {
     visibility: visible;
 }
 
+#graphs {
+    width: 70%;
+    margin: 0 auto;
+}
