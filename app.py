@@ -27,8 +27,6 @@ sensor_data = pd.DataFrame(columns=['Time', 'CO₂ (PPM)', 'Temperature (°C)', 
 
 def serve_layout():
     df = db.get_map_data()
-    zoom, b_box_lat, b_box_lon = get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=df['lon'],
-                                                                                                   latitudes=df['lat'])
 
     return html.Div([
         html.Div(id='onload', hidden=True),
@@ -54,13 +52,13 @@ def serve_layout():
                 [
                     dl.TileLayer(url='https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
                                  attribution='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'),
+                    dl.LocateControl(startDirectly=True, options=dict(keepCurrentZoomLevel=True, drawCircle=False, drawMarker=False)),
                     dl.GeoJSON(id='geojson'),
                     dl.Colorbar(colorscale=colorscale, width=20, height=200, min=300, max=600, unit='PPM'),
                     dl.GestureHandling(),
                 ],
                 id='map',
-                center=(b_box_lat, b_box_lon),
-                zoom=zoom,
+                zoom=3,
                 minZoom=3,
                 maxBounds=[[-75, -180],[75, 200]],
             ),
@@ -89,51 +87,6 @@ def serve_layout():
             html.Div(id='timezone', hidden=True),
         ], id='graphs'),
     ])
-
-
-def get_plotting_zoom_level_and_center_coordinates_from_lonlat_tuples(longitudes=None, latitudes=None):
-    """
-    Basic framework adopted from Krichardson under the following thread:
-    https://community.plotly.com/t/dynamic-zoom-for-mapbox/32658/7
-
-    # NOTE: THIS IS A TEMPORARY SOLUTION UNTIL THE DASH TEAM IMPLEMENTS DYNAMIC ZOOM
-    # in their plotly-functions associated with mapbox, such as go.Densitymapbox() etc.
-
-    Returns the appropriate zoom-level for these plotly-mapbox-graphics along with
-    the center coordinates of all provided coordinate tuples.
-    """
-
-    # Check whether both latitudes and longitudes have been passed,
-    # or if the list lengths don't match
-    if ((latitudes is None or longitudes is None)
-            or (len(latitudes) != len(longitudes))):
-        # Otherwise, return the default values of 0 zoom and the coordinate origin as center point
-        return 0, (0, 0)
-
-    # Get the boundary-box 
-    b_box = {
-        'height': latitudes.max() - latitudes.min(),
-        'width': longitudes.max() - longitudes.min(),
-        'center_lat': np.mean(latitudes),
-        'center_lon': np.mean(longitudes)
-    }
-
-    # get the area of the bounding box in order to calculate a zoom-level
-    area = b_box['height'] * b_box['width']
-
-    # * 1D-linear interpolation with numpy:
-    # - Pass the area as the only x-value and not as a list, in order to return a scalar as well
-    # - The x-points "xp" should be in parts in comparable order of magnitude of the given area
-    # - The zoom-levels are adapted to the areas, i.e. start with the smallest area possible of 0
-    # which leads to the highest possible zoom value 20, and so forth decreasing with increasing areas
-    # as these variables are anti-proportional
-    zoom = np.interp(x=area,
-                     xp=[0, 5 ** -10, 4 ** -10, 3 ** -10, 2 ** -10, 1 ** -10, 1 ** -5],
-                     fp=[20, 15, 14, 13, 11, 6, 4])
-
-    # Finally, return the zoom level and the associated boundary-box center coordinates
-    return zoom, b_box['center_lat'], b_box['center_lon']
-
 
 app.layout = serve_layout
 

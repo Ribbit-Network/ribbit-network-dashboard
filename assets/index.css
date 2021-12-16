@@ -31,6 +31,10 @@ body {
     display: inline-block;
 }
 
+#map-container .leaflet-control-locate {
+    visibility: hidden;
+}
+
 #controls {
     display: flex;
     margin: 16px;
