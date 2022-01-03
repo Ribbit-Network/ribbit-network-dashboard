@@ -30,7 +30,6 @@ jobs:
     #  needs: build
 
     - name: Dash tests (Webdriver)
-      runs-on: ubuntu-latest
       services:
       hub:
         image: selenium/hub
