@@ -27,7 +27,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ~/.cache/pip
-        key: ${{ hashFiles(requirements.txt) }}-${{ hashFiles('requirements-test.txt') }}
+        key: ${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-test.txt') }}
 
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
