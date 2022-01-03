@@ -40,7 +40,6 @@ jobs:
     #  needs: build
 
     - name: Dash tests (Webdriver)
-      run:
-        - pytest --headless --remote-url http://hub:4444
-        - echo wheeee
+      run: |
+        pytest --headless --remote-url http://hub:4444
 
