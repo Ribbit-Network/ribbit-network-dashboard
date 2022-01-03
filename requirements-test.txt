@@ -1,0 +1,2 @@
+dash[testing]==1.20.0  # Keep version in sync with requirements.txt
+

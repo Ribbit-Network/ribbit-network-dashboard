@@ -1,7 +1,7 @@
 Brotli==1.0.9
 certifi==2021.5.30
 click==8.0.1
-dash==1.20.0
+dash==1.20.0  # Keep version in sync with requirements-test.txt
 dash-core-components==1.16.0
 dash-extensions==0.0.60
 dash-html-components==1.1.3
