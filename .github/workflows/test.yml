@@ -11,6 +11,16 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+
+    services:
+      hub:
+        image: selenium/hub
+      chrome:
+        image: selenium/node-chrome
+        env:
+          HUB_HOST: hub
+          HUB_PORT: 4444
+
     steps:
     - uses: actions/checkout@v2
 
@@ -30,14 +40,6 @@ jobs:
     #  needs: build
 
     - name: Dash tests (Webdriver)
-      services:
-      hub:
-        image: selenium/hub
-      chrome:
-        image: selenium/node-chrome
-        env:
-          HUB_HOST: hub
-          HUB_PORT: 4444
       run:
         - pytest --headless --remote-url http://hub:4444
         - echo wheeee
