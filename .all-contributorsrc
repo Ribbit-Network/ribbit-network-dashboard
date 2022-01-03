@@ -64,6 +64,16 @@
         "code",
         "review"
       ]
+    },
+    {
+      "login": "abesto",
+      "name": "Zoltán Nagy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59982?v=4",
+      "profile": "https://abesto.net",
+      "contributions": [
+        "test",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
