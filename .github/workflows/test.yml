@@ -4,7 +4,7 @@ name: Dashboard Tests
 
 on:
   push:
-    branches: [ $default-branch, dash-tests ]
+    branches: [ $default-branch ]
   pull_request:
     branches: [ $default-branch ]
 
