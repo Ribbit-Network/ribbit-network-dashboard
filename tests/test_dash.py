@@ -1,9 +1,7 @@
-import dash
+from app import app
 
 
 def test_dash001_smoke(dash_duo):
-    app = dash.Dash(__name__)
-
     dash_duo.start_server(app)
 
     dash_duo.wait_for_element("h1")
