@@ -50,9 +50,16 @@ body {
     width: 160px;
 }
 
-#controls #duration {
+#controls #duration, #frequency {
     margin-right: 8px;
     width: 160px;
+}
+
+
+#controls #durationLabel, #frequencyLabel {
+	margin-right: 8px;
+    font-weight: bold;
+	text-align: center;
 }
 
 #controls #export {
