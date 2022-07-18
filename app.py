@@ -22,7 +22,7 @@ colorscale = ['lightgreen', 'green', 'darkgreen', 'black']
 app = dash.Dash(__name__, title=TITLE, update_title=None, external_scripts=[chroma])
 server = app.server
 
-sensor_data = pd.DataFrame(columns=['Time', 'CO₂ (PPM)', 'Temperature (°C)', 'Barometric Pressure (mBar)', 'Humidity (%)'])
+sensor_data = pd.DataFrame(columns=['Time', 'CO2 (PPM)', 'Temperature (degC)', 'Barometric Pressure (mBar)', 'Humidity (%)'])
 
 
 def serve_layout():
@@ -63,15 +63,23 @@ def serve_layout():
                 maxBounds=[[-75, -180],[75, 200]],
             ),
         ], id='map-container'),
-
         html.Div([
-            dcc.Dropdown(id='duration', clearable=False, searchable=False, value='24h', options=[
+			html.Label(['Duration'], id='durationLabel'),
+            dcc.Dropdown(id='duration', clearable=False, searchable=False, value='7d', options=[
                 {'label': '10 minutes', 'value': '10m'},
                 {'label': '30 minutes', 'value': '30m'},
                 {'label': '1 hour', 'value': '1h'},
                 {'label': '1 day', 'value': '24h'},
                 {'label': '7 days', 'value': '7d'},
                 {'label': '30 days', 'value': '30d'},
+            ]),
+			html.Label(['Sampling'], id='frequencyLabel'),
+			dcc.Dropdown(id='frequency', clearable=False, searchable=False, value='1h', options=[
+                {'label': '1 minute sample', 'value': '1min'},
+                {'label': '5 minute average', 'value': '5min'},
+				{'label': '15 minute  average', 'value': '15min'},
+				{'label': '30 minute average', 'value': '30min'},
+                {'label': '1 hour average', 'value': '1h'},
             ]),
             html.Div([
                 html.Button(html.Div([
@@ -149,7 +157,7 @@ def update_map(_children, _n_intervals):
         clusterToLayer=cluster_to_layer,
         zoomToBoundsOnClick=True,
         superClusterOptions=dict(radius=100),
-        hideout=dict(colorProp='co2', circleOptions=dict(fillOpacity=1, stroke=False, radius=8), min=300, max=600,
+        hideout=dict(colorProp='co2', circleOptions=dict(fillOpacity=1, stroke=False, radius=12), min=300, max=600,
                      colorscale=colorscale),
     )
 
@@ -160,27 +168,36 @@ def update_map(_children, _n_intervals):
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
+		Input('frequency', 'value'),
         Input('geojson', 'click_feature'),
         Input('interval', 'n_intervals'),
     ],
 )
-def update_graphs(timezone, duration, click_feature, _n_intervals):
+def update_graphs(timezone, duration, frequency, click_feature, _n_intervals):
     global sensor_data
 
     if click_feature is not None:
         sensor = click_feature.get('properties', {}).get('host', None)
         if sensor is not None:
-            sensor_data = db.get_sensor_data(sensor, duration)
+            sensor_data = db.get_sensor_data(sensor, duration, frequency)
             sensor_data.rename(
-                columns={'_time': 'Time', 'co2': 'CO₂ (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
-                         'alt': 'Altitude (m)', 'temperature': 'Temperature (°C)',
+                columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
+                         'alt': 'Altitude (m)', 'temperature': 'Temperature (degC)',
                          'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
             sensor_data['Time'] = sensor_data['Time'].dt.tz_convert(timezone)
 
-    columns_to_plot = ['CO₂ (PPM)', 'Temperature (°C)', 'Barometric Pressure (mBar)', 'Humidity (%)']
+    columns_to_plot = ['CO2 (PPM)', 'Temperature (degC)', 'Barometric Pressure (mBar)', 'Humidity (%)']
     fig = make_subplots(rows=4, cols=1, shared_xaxes=True)
     for ind, col in enumerate(columns_to_plot):
-        fig.add_scatter(x=sensor_data["Time"], y=sensor_data[col], mode="lines", line=go.scatter.Line(color="black"), showlegend=False, row=ind+1, col=1, hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>", text=[col]*len(sensor_data[col]))
+        fig.add_scatter(x=sensor_data["Time"], 
+						y=sensor_data[col], 
+						mode="lines", 
+						line=go.scatter.Line(color="black"), 
+						showlegend=False, 
+						row=ind+1, 
+						col=1, 
+						hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>", 
+						text=[col]*len(sensor_data[col]))
         fig.update_yaxes(title_text=col, row=ind+1, col=1)
     fig.update_layout(template="plotly_white", height=1200)
     return fig
