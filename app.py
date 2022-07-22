@@ -90,7 +90,7 @@ def serve_layout():
         ], id='controls'),
 
         html.Div([
-            dcc.Graph(id='timeseries'),
+            html.Div(id='timeseries'),
             html.Div(id='timezone', hidden=True),
         ], id='graphs'),
     ])
@@ -112,6 +112,12 @@ point_to_layer = assign('''function(feature, latlng, context) {
     const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
     const csc = chroma.scale(colorscale).domain([min, max]);
     circleOptions.fillColor = csc(feature.properties[colorProp]);
+    // Lower opacity for sensors with stale data
+    if (new Date() - new Date(feature.properties._time) > 1000 * 60 * 60 * 2) {
+        circleOptions.fillOpacity = 0.3;
+    } else {
+        circleOptions.fillOpacity = 1;
+    }
     return L.circleMarker(latlng, circleOptions);
 }''')
 
@@ -146,7 +152,7 @@ cluster_to_layer = assign('''function(feature, latlng, index, context) {
 )
 def update_map(_children, _n_intervals):
     df = db.get_map_data()
-    df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM'
+    df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM<br />' + df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S').astype(str)
 
     return dl.GeoJSON(
         id='geojson',
@@ -163,7 +169,7 @@ def update_map(_children, _n_intervals):
 
 # Update Data Plots
 @app.callback(
-    Output('timeseries', 'figure'),
+    Output('timeseries', 'children'),
     [
         Input('timezone', 'children'),
         Input('duration', 'value'),
@@ -179,6 +185,8 @@ def update_graphs(timezone, duration, frequency, click_feature, _n_intervals):
         sensor = click_feature.get('properties', {}).get('host', None)
         if sensor is not None:
             sensor_data = db.get_sensor_data(sensor, duration, frequency)
+            if sensor_data.empty:
+                return html.P('No data available for this sensor in the selected time range.')
             sensor_data.rename(
                 columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
                          'alt': 'Altitude (m)', 'temperature': 'Temperature (degC)',
@@ -199,7 +207,7 @@ def update_graphs(timezone, duration, frequency, click_feature, _n_intervals):
 						text=[col]*len(sensor_data[col]))
         fig.update_yaxes(title_text=col, row=ind+1, col=1)
     fig.update_layout(template="plotly_white", height=1200)
-    return fig
+    return dcc.Graph(figure=fig)
 
 
 # Export data as CSV
