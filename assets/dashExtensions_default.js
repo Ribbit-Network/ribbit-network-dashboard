@@ -10,6 +10,12 @@ window.dashExtensions = Object.assign({}, window.dashExtensions, {
             } = context.props.hideout;
             const csc = chroma.scale(colorscale).domain([min, max]);
             circleOptions.fillColor = csc(feature.properties[colorProp]);
+            // Lower opacity for sensors with stale data
+            if (new Date() - new Date(feature.properties._time) > 1000 * 60 * 60 * 2) {
+                circleOptions.fillOpacity = 0.3;
+            } else {
+                circleOptions.fillOpacity = 1;
+            }
             return L.circleMarker(latlng, circleOptions);
         },
         function1: function(feature, latlng, index, context) {
