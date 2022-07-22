@@ -1,6 +1,5 @@
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc, html
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 import db
@@ -36,15 +35,15 @@ def serve_layout():
             html.Img(src='assets/frog.svg'),
             html.H1(TITLE),
             html.A(html.H3('Learn'), href='https://ribbitnetwork.org/',
-                   style={'margin-left': 'auto', 'text-decoration': 'underline', 'color': 'black'}),
+                   style={'marginLeft': 'auto', 'textDecoration': 'underline', 'color': 'black'}),
             html.A(html.H3('Build'),
                    href='https://github.com/Ribbit-Network/ribbit-network-frog-sensor#build-a-frog',
-                   style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
+                   style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
             html.A(html.H3('Order'),
                    href='https://ribbitnetwork.org/#buy',
-                   style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
+                   style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
             html.A(html.H3('Support'), href='https://ko-fi.com/keenanjohnson',
-                   style={'margin-left': '2em', 'text-decoration': 'underline', 'color': 'black'}),
+                   style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
         ], id='nav'),
 
         html.Div([
