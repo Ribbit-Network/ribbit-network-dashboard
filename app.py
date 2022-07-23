@@ -23,8 +23,6 @@ server = app.server
 
 
 def serve_layout():
-    df = db.get_map_data()
-
     return html.Div([
         html.Div(id='onload', hidden=True),
         dcc.Interval(id='interval', interval=REFRESH_MS, n_intervals=0),
@@ -52,7 +50,7 @@ def serve_layout():
                     dl.TileLayer(url='https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
                                  attribution='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'),
                     dl.LocateControl(startDirectly=True, options=dict(keepCurrentZoomLevel=True, drawCircle=False, drawMarker=False)),
-                    dl.GeoJSON(id='geojson'),
+                    dl.LayerGroup(id='marker-layer', children=[dl.GeoJSON(id="geojson")]),
                     dl.Colorbar(colorscale=colorscale, width=20, height=200, min=300, max=600, unit='PPM'),
                     dl.GestureHandling(),
                 ],
@@ -144,13 +142,14 @@ cluster_to_layer = assign('''function(feature, latlng, index, context) {
 
 # Update the Map
 @app.callback(
-    Output('geojson', 'children'),
+    Output('marker-layer', 'children'),
     [
         Input('onload', 'children'),
         Input('interval', 'n_intervals'),
+        Input('selected-sensor', 'data'),
     ],
 )
-def update_map(_children, _n_intervals):
+def update_map(_children, _n_intervals, selected_sensor):
     df = db.get_map_data()
     df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM<br />' + df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S').astype(str)
 
