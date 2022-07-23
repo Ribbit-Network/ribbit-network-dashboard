@@ -107,16 +107,30 @@ app.clientside_callback(
 )
 
 point_to_layer = assign('''function(feature, latlng, context) {
-    const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
+    const {min, max, colorscale, circleOptions, colorProp, selectedSensor} = context.props.hideout;
     const csc = chroma.scale(colorscale).domain([min, max]);
-    circleOptions.fillColor = csc(feature.properties[colorProp]);
+
+    const extraOptions = {
+        fillColor: csc(feature.properties[colorProp])
+    };
+
     // Lower opacity for sensors with stale data
     if (new Date() - new Date(feature.properties._time) > 1000 * 60 * 60 * 2) {
-        circleOptions.fillOpacity = 0.3;
+        extraOptions.fillOpacity = 0.3;
     } else {
-        circleOptions.fillOpacity = 1;
+        extraOptions.fillOpacity = 1;
     }
-    return L.circleMarker(latlng, circleOptions);
+
+    // Highlight selected sensor
+    if (selectedSensor === feature.properties.host) {
+        extraOptions.stroke = true;
+        extraOptions.color = 'cyan';
+        extraOptions.weight = 10;
+    } else {
+        extraOptions.stroke = false;
+    }
+
+    return L.circleMarker(latlng, {...circleOptions, ...extraOptions});
 }''')
 
 cluster_to_layer = assign('''function(feature, latlng, index, context) {
@@ -161,8 +175,8 @@ def update_map(_children, _n_intervals, selected_sensor):
         clusterToLayer=cluster_to_layer,
         zoomToBoundsOnClick=True,
         superClusterOptions=dict(radius=100),
-        hideout=dict(colorProp='co2', circleOptions=dict(fillOpacity=1, stroke=False, radius=12), min=300, max=600,
-                     colorscale=colorscale),
+        hideout=dict(colorProp='co2', circleOptions=dict(radius=12), min=300, max=600,
+                     colorscale=colorscale, selectedSensor=selected_sensor),
     )
 
 
