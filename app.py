@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from dash.dependencies import Output, Input, State
-from dash_extensions.javascript import assign
+from dash_extensions.javascript import Namespace
 from plotly.subplots import make_subplots
 
 TITLE = 'Ribbit Network'
@@ -16,6 +16,8 @@ REFRESH_MS = 60 * 1000
 
 chroma = 'https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js'
 colorscale = ['lightgreen', 'green', 'darkgreen', 'black']
+
+map_js = Namespace('ribbit', 'map')
 
 # Dash App
 app = dash.Dash(__name__, title=TITLE, update_title=None, external_scripts=[chroma])
@@ -106,53 +108,6 @@ app.clientside_callback(
     Input('onload', 'children'),
 )
 
-point_to_layer = assign('''function(feature, latlng, context) {
-    const {min, max, colorscale, circleOptions, colorProp, selectedSensor} = context.props.hideout;
-    const csc = chroma.scale(colorscale).domain([min, max]);
-
-    const extraOptions = {
-        fillColor: csc(feature.properties[colorProp])
-    };
-
-    // Lower opacity for sensors with stale data
-    if (new Date() - new Date(feature.properties._time) > 1000 * 60 * 60 * 2) {
-        extraOptions.fillOpacity = 0.3;
-    } else {
-        extraOptions.fillOpacity = 1;
-    }
-
-    // Highlight selected sensor
-    if (selectedSensor === feature.properties.host) {
-        extraOptions.stroke = true;
-        extraOptions.color = 'cyan';
-        extraOptions.weight = 10;
-    } else {
-        extraOptions.stroke = false;
-    }
-
-    return L.circleMarker(latlng, {...circleOptions, ...extraOptions});
-}''')
-
-cluster_to_layer = assign('''function(feature, latlng, index, context) {
-    const {min, max, colorscale, circleOptions, colorProp} = context.props.hideout;
-    const csc = chroma.scale(colorscale).domain([min, max]);
-    // Set color based on mean value of leaves.
-    const leaves = index.getLeaves(feature.properties.cluster_id);
-    let valueSum = 0;
-    for (let i = 0; i < leaves.length; ++i) {
-        valueSum += leaves[i].properties[colorProp]
-    }
-    const valueMean = valueSum / leaves.length;
-    // Render a circle with the number of leaves written in the center.
-    const icon = L.divIcon.scatter({
-        html: '<div style="background-color:white;"><span>' + feature.properties.point_count_abbreviated + '</span></div>',
-        className: "marker-cluster",
-        iconSize: L.point(40, 40),
-        color: csc(valueMean)
-    });
-    return L.marker(latlng, {icon : icon})
-}''')
-
 
 # Update the Map
 @app.callback(
@@ -170,9 +125,9 @@ def update_map(_children, _n_intervals, selected_sensor):
     return dl.GeoJSON(
         id='geojson',
         data=dlx.dicts_to_geojson(df.to_dict('records')),
-        options=dict(pointToLayer=point_to_layer),
+        options=dict(pointToLayer=map_js('pointToLayer')),
         cluster=True,
-        clusterToLayer=cluster_to_layer,
+        clusterToLayer=map_js('clusterToLayer'),
         zoomToBoundsOnClick=True,
         superClusterOptions=dict(radius=100),
         hideout=dict(colorProp='co2', circleOptions=dict(radius=12), min=300, max=600,
