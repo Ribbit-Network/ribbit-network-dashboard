@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from dash.dependencies import Output, Input
+from dash.dependencies import Output, Input, State
 from dash_extensions.javascript import assign
 from plotly.subplots import make_subplots
 
@@ -21,8 +21,6 @@ colorscale = ['lightgreen', 'green', 'darkgreen', 'black']
 app = dash.Dash(__name__, title=TITLE, update_title=None, external_scripts=[chroma])
 server = app.server
 
-sensor_data = pd.DataFrame(columns=['Time', 'CO2 (PPM)', 'Temperature (degC)', 'Barometric Pressure (mBar)', 'Humidity (%)'])
-
 
 def serve_layout():
     df = db.get_map_data()
@@ -31,6 +29,7 @@ def serve_layout():
         html.Div(id='onload', hidden=True),
         dcc.Interval(id='interval', interval=REFRESH_MS, n_intervals=0),
         dcc.Store(id='selected-sensor', storage_type='local', data=None),
+        dcc.Store(id='sensor-data', storage_type='local', data=[]),
 
         html.Div([
             html.Img(src='assets/frog.svg'),
@@ -184,45 +183,64 @@ def handle_click(click_feature, old_data):
         return old_data
 
 
-# Update Data Plots
 @app.callback(
-    Output('timeseries', 'children'),
+    Output('sensor-data', 'data'),
     [
+        Input('selected-sensor', 'data'),
         Input('timezone', 'children'),
         Input('duration', 'value'),
 		Input('frequency', 'value'),
-        Input('selected-sensor', 'data'),
-        Input('interval', 'n_intervals'),
-    ],
+    ]
 )
-def update_graphs(timezone, duration, frequency, sensor, _n_intervals):
-    if sensor is not None:
-        sensor_data = db.get_sensor_data(sensor, duration, frequency)
-        if sensor_data.empty:
-            return html.P('No data available for this sensor in the selected time range.')
+def fetch_sensor_data(sensor, timezone, duration, frequency):
+    if sensor is None:
+        return None
+    sensor_data = db.get_sensor_data(sensor, duration, frequency)
+
+    if not sensor_data.empty:
         sensor_data.rename(
             columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
                         'alt': 'Altitude (m)', 'temperature': 'Temperature (degC)',
                         'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
         sensor_data['Time'] = sensor_data['Time'].dt.tz_convert(timezone)
 
-        columns_to_plot = ['CO2 (PPM)', 'Temperature (degC)', 'Barometric Pressure (mBar)', 'Humidity (%)']
-        fig = make_subplots(rows=4, cols=1, shared_xaxes=True)
-        for ind, col in enumerate(columns_to_plot):
-            fig.add_scatter(x=sensor_data["Time"], 
-                            y=sensor_data[col], 
-                            mode="lines", 
-                            line=go.scatter.Line(color="black"), 
-                            showlegend=False, 
-                            row=ind+1, 
-                            col=1, 
-                            hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>", 
-                            text=[col]*len(sensor_data[col]))
-            fig.update_yaxes(title_text=col, row=ind+1, col=1)
-        fig.update_layout(template="plotly_white", height=1200)
-        return dcc.Graph(figure=fig)
-    else:
+    # Pandas `DataFrame`s cannot be serialized to JSON, and Dash (React) properties / states need to be JSON-serializable.
+    # Thus: convert the data to a list of dictionaries. They can be reloaded into a DataFrame as `pd.DataFrame(sensor_data)`
+    return sensor_data.to_dict('records')
+
+
+# Update Data Plots
+@app.callback(
+    Output('timeseries', 'children'),
+    [
+        Input('sensor-data', 'data'),
+        Input('selected-sensor', 'data'),
+        Input('interval', 'n_intervals'),
+    ],
+)
+def update_graphs(sensor_data, sensor, _n_intervals):
+    if sensor is None:
         return html.P('Please click on a sensor to see its data.')
+
+    sensor_data = pd.DataFrame(sensor_data)
+    if sensor_data.empty:
+        return html.P('No data available for this sensor in the selected time range.')
+
+    columns_to_plot = ['CO2 (PPM)', 'Temperature (degC)', 'Barometric Pressure (mBar)', 'Humidity (%)']
+    fig = make_subplots(rows=4, cols=1, shared_xaxes=True)
+    for ind, col in enumerate(columns_to_plot):
+        fig.add_scatter(x=sensor_data["Time"], 
+                        y=sensor_data[col], 
+                        mode="lines", 
+                        line=go.scatter.Line(color="black"), 
+                        showlegend=False, 
+                        row=ind+1, 
+                        col=1, 
+                        hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>", 
+                        text=[col]*len(sensor_data[col]))
+        fig.update_yaxes(title_text=col, row=ind+1, col=1)
+    fig.update_layout(template="plotly_white", height=1200)
+    return dcc.Graph(figure=fig)
 
 
 
@@ -230,8 +248,10 @@ def update_graphs(timezone, duration, frequency, sensor, _n_intervals):
 @app.callback(
     Output('download', 'data'),
     Input('export', 'n_clicks'),
+    State('sensor-data', 'data')
 )
-def export_data(n_clicks):
+def export_data(n_clicks, sensor_data):
+    sensor_data = pd.DataFrame(sensor_data)
     if n_clicks is None or sensor_data.empty:
         return
 
