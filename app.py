@@ -30,6 +30,7 @@ def serve_layout():
     return html.Div([
         html.Div(id='onload', hidden=True),
         dcc.Interval(id='interval', interval=REFRESH_MS, n_intervals=0),
+        dcc.Store(id='selected-sensor', storage_type='local', data=None),
 
         html.Div([
             html.Img(src='assets/frog.svg'),
@@ -167,6 +168,22 @@ def update_map(_children, _n_intervals):
     )
 
 
+@app.callback(
+    Output('selected-sensor', 'data'),
+    [
+        Input('geojson', 'click_feature'),
+        Input('selected-sensor', 'data')
+    ]
+)
+def handle_click(click_feature, old_data):
+    if click_feature is None:
+        return old_data
+    try:
+        return click_feature['properties']['host']
+    except KeyError:
+        return old_data
+
+
 # Update Data Plots
 @app.callback(
     Output('timeseries', 'children'),
@@ -174,40 +191,39 @@ def update_map(_children, _n_intervals):
         Input('timezone', 'children'),
         Input('duration', 'value'),
 		Input('frequency', 'value'),
-        Input('geojson', 'click_feature'),
+        Input('selected-sensor', 'data'),
         Input('interval', 'n_intervals'),
     ],
 )
-def update_graphs(timezone, duration, frequency, click_feature, _n_intervals):
-    global sensor_data
+def update_graphs(timezone, duration, frequency, sensor, _n_intervals):
+    if sensor is not None:
+        sensor_data = db.get_sensor_data(sensor, duration, frequency)
+        if sensor_data.empty:
+            return html.P('No data available for this sensor in the selected time range.')
+        sensor_data.rename(
+            columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
+                        'alt': 'Altitude (m)', 'temperature': 'Temperature (degC)',
+                        'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
+        sensor_data['Time'] = sensor_data['Time'].dt.tz_convert(timezone)
 
-    if click_feature is not None:
-        sensor = click_feature.get('properties', {}).get('host', None)
-        if sensor is not None:
-            sensor_data = db.get_sensor_data(sensor, duration, frequency)
-            if sensor_data.empty:
-                return html.P('No data available for this sensor in the selected time range.')
-            sensor_data.rename(
-                columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
-                         'alt': 'Altitude (m)', 'temperature': 'Temperature (degC)',
-                         'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
-            sensor_data['Time'] = sensor_data['Time'].dt.tz_convert(timezone)
+        columns_to_plot = ['CO2 (PPM)', 'Temperature (degC)', 'Barometric Pressure (mBar)', 'Humidity (%)']
+        fig = make_subplots(rows=4, cols=1, shared_xaxes=True)
+        for ind, col in enumerate(columns_to_plot):
+            fig.add_scatter(x=sensor_data["Time"], 
+                            y=sensor_data[col], 
+                            mode="lines", 
+                            line=go.scatter.Line(color="black"), 
+                            showlegend=False, 
+                            row=ind+1, 
+                            col=1, 
+                            hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>", 
+                            text=[col]*len(sensor_data[col]))
+            fig.update_yaxes(title_text=col, row=ind+1, col=1)
+        fig.update_layout(template="plotly_white", height=1200)
+        return dcc.Graph(figure=fig)
+    else:
+        return html.P('Please click on a sensor to see its data.')
 
-    columns_to_plot = ['CO2 (PPM)', 'Temperature (degC)', 'Barometric Pressure (mBar)', 'Humidity (%)']
-    fig = make_subplots(rows=4, cols=1, shared_xaxes=True)
-    for ind, col in enumerate(columns_to_plot):
-        fig.add_scatter(x=sensor_data["Time"], 
-						y=sensor_data[col], 
-						mode="lines", 
-						line=go.scatter.Line(color="black"), 
-						showlegend=False, 
-						row=ind+1, 
-						col=1, 
-						hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>", 
-						text=[col]*len(sensor_data[col]))
-        fig.update_yaxes(title_text=col, row=ind+1, col=1)
-    fig.update_layout(template="plotly_white", height=1200)
-    return dcc.Graph(figure=fig)
 
 
 # Export data as CSV
