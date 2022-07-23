@@ -1,15 +1,18 @@
+from typing import Optional, Union
+
 import dash
 from dash import dcc, html
-import dash_leaflet as dl
-import dash_leaflet.express as dlx
-import db
-import numpy as np
+
 import pandas as pd
 import plotly.graph_objects as go
 
+from plotly.subplots import make_subplots
 from dash.dependencies import Output, Input, State
 from dash_extensions.javascript import Namespace
-from plotly.subplots import make_subplots
+import dash_leaflet as dl
+import dash_leaflet.express as dlx
+
+import db
 
 TITLE = 'Ribbit Network'
 REFRESH_MS = 60 * 1000
@@ -24,7 +27,7 @@ app = dash.Dash(__name__, title=TITLE, update_title=None, external_scripts=[chro
 server = app.server
 
 
-def serve_layout():
+def serve_layout() -> html.Div:
     return html.Div([
         html.Div(id='onload', hidden=True),
         dcc.Interval(id='interval', interval=REFRESH_MS, n_intervals=0),
@@ -118,7 +121,7 @@ app.clientside_callback(
         Input('selected-sensor', 'data'),
     ],
 )
-def update_map(_children, _n_intervals, selected_sensor):
+def update_map(_children, _n_intervals, selected_sensor: Optional[str]) -> dl.GeoJSON:
     df = db.get_map_data()
     df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM<br />' + df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S').astype(str)
 
@@ -142,7 +145,7 @@ def update_map(_children, _n_intervals, selected_sensor):
         Input('selected-sensor', 'data')
     ]
 )
-def handle_click(click_feature, old_data):
+def handle_click(click_feature: dict, old_data: Optional[str]) -> Optional[str]:
     if click_feature is None:
         return old_data
     try:
@@ -160,7 +163,7 @@ def handle_click(click_feature, old_data):
 		Input('frequency', 'value'),
     ]
 )
-def fetch_sensor_data(sensor, timezone, duration, frequency):
+def fetch_sensor_data(sensor: str, timezone: str, duration: str, frequency: str):
     if sensor is None:
         return None
     sensor_data = db.get_sensor_data(sensor, duration, frequency)
@@ -186,7 +189,7 @@ def fetch_sensor_data(sensor, timezone, duration, frequency):
         Input('interval', 'n_intervals'),
     ],
 )
-def update_graphs(sensor_data, sensor, _n_intervals):
+def update_graphs(sensor_data: list, sensor: Optional[str], _n_intervals) -> Union[html.P, dcc.Graph]:
     if sensor is None:
         return html.P('Please click on a sensor to see its data.')
 
@@ -218,7 +221,7 @@ def update_graphs(sensor_data, sensor, _n_intervals):
     Input('export', 'n_clicks'),
     State('sensor-data', 'data')
 )
-def export_data(n_clicks, sensor_data):
+def export_data(n_clicks: Optional[int], sensor_data: list) -> dict:
     sensor_data = pd.DataFrame(sensor_data)
     if n_clicks is None or sensor_data.empty:
         return

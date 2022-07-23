@@ -24,7 +24,7 @@ def get_map_data() -> pd.DataFrame:
 
 # `100` chosen arbitrarily, tweak with extreme prejudice
 @cached(cache=TTLCache(maxsize=100, ttl=60))
-def get_sensor_data(host, duration, frequency=None):
+def get_sensor_data(host: str, duration: str, frequency: str) -> pd.DataFrame:
     df = query_api.query_data_frame('from(bucket:"co2")'
                                     f'|> range(start: -{duration})'
                                     f'|> filter(fn: (r) => r.host == "{host}")'
