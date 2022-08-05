@@ -23,12 +23,11 @@ export function MyMapComponent() {
       "|> filter(fn: (r) => r.lat != 0 and r.lon != 0)" +
       '|> keep(columns: ["_time", "host", "lat", "lon", "co2"])';
 
-    const map = new window.google.maps.Map(ref.current!, {
+    const mapInstance = new window.google.maps.Map(ref.current!, {
       zoom: 3,
       center: { lat: 37.775, lng: -122.434 },
       mapTypeId: "satellite",
     });
-    setMap(map);
 
     influxDB.queryRows(mapQuery, {
       next: (raw: any, tableMeta: any) => {
@@ -52,7 +51,7 @@ export function MyMapComponent() {
         console.log("creating a heatmap now...");
         new window.google.maps.visualization.HeatmapLayer({
           data: heatmapLayerRows,
-          map,
+          map: mapInstance,
         });
       },
     });
