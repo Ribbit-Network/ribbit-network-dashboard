@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { Box } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { InfluxDB } from "@influxdata/influxdb-client-browser";
+import { Info } from "@mui/icons-material";
 
 export function MyMapComponent() {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -41,10 +42,35 @@ export function MyMapComponent() {
           _time: string;
         } = tableMeta.toObject(raw);
 
-        setHeatmapLayerRows((prev) => [
-          ...prev,
-          new google.maps.LatLng(row.lat, row.lon),
-        ]);
+        const point = new google.maps.LatLng(row.lat, row.lon);
+
+        setHeatmapLayerRows((prev) => [...prev, point]);
+
+        const infowindow = new google.maps.InfoWindow({
+          content: `
+        <div>
+              <Typography><strong>${row.co2.toFixed(
+                0
+              )}</strong> kg CO2 emitted</Typography>
+              <br/>
+              <Typography>${new Date(row._time).toDateString()}</Typography>
+            </div>`,
+        });
+
+        const marker = new google.maps.Marker({
+          position: point,
+          map: mapInstance,
+          title: "",
+          icon: " ",
+        });
+
+        marker.addListener("click", () => {
+          infowindow.open({
+            anchor: marker,
+            map: mapInstance,
+            shouldFocus: false,
+          });
+        });
       },
       error: console.error,
       complete: () => {
