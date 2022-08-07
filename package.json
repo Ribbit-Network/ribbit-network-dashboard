@@ -1,6 +1,6 @@
 {
-  "name": "v2",
-  "version": "0.1.0",
+  "name": "ribbit-network-dashboard",
+  "version": "2.0.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.0",
@@ -8,33 +8,18 @@
     "@influxdata/influxdb-client-browser": "^1.28.0",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.9.3",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/d3": "^7.4.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.11.47",
-    "@types/react": "^18.0.15",
-    "@types/react-dom": "^18.0.6",
-    "d3": "^7.6.1",
     "firebase": "^9.9.2",
-    "google-map-react": "^2.2.0",
-    "googleapis": "^105.0.0",
     "mobx": "^6.6.1",
     "mobx-react": "^7.5.2",
-    "prettier": "^2.7.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "typescript": "^4.7.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "deploy": "npm run build && firebase deploy --only hosting"
+    "deploy": "npm version patch && npm run build && firebase deploy --only hosting"
   },
   "eslintConfig": {
     "extends": [
@@ -56,6 +41,15 @@
   },
   "devDependencies": {
     "@types/google-map-react": "^2.1.7",
-    "@types/google.maps": "^3.49.2"
+    "@types/google.maps": "^3.49.2",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/d3": "^7.4.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.11.47",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "typescript": "^4.7.4"
   }
 }

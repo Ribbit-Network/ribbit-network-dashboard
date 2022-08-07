@@ -1,15 +1,15 @@
 {
   "name": "functions",
   "scripts": {
-    "build": "tsc",
-    "serve": "npm run build && firebase emulators:start --only functions",
-    "shell": "npm run build && firebase functions:shell",
-    "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "start": "npm run compile & firebase emulators:start --only functions",
+    "dev": "npm run compile & node lib/index.js",
+    "compile": "tsc-silent --watch --project tsconfig.json --noImplicitAny --stats",
+    "build": "tsc-silent --project tsconfig.json --stats",
+    "deploy": "npm version patch && firebase deploy --only functions",
+    "bump": "npm version patch"
   },
   "engines": {
-    "node": "14"
+    "node": "10"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -20,7 +20,9 @@
   },
   "devDependencies": {
     "firebase-functions-test": "^0.2.0",
-    "typescript": "^3.8.0"
+    "typescript": "^3.8.0",
+    "concurrently": "^6.5.1",
+    "tsc-silent": "^1.2.1"
   },
   "private": true
 }
