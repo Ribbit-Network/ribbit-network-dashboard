@@ -17,8 +17,7 @@ class Core {
   constructor() {
     this.influxDB = new InfluxDB({
       url: "https://us-west-2-1.aws.cloud2.influxdata.com",
-      token:
-        "wQdQ6Xeh0jvjy_oCHnqYtux9qNaoEdt57B4mQiFz6gV-itMn2WnuLnolwAVfFuE6c6dR27m6bUxdqSxb9f5Rog==",
+      token: process.env.influxDBToken,
     }).getQueryApi("keenan.johnson@gmail.com");
 
     makeAutoObservable(this);

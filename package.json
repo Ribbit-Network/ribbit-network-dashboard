@@ -5,7 +5,6 @@
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
-    "@influxdata/influxdb-client-browser": "^1.28.0",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.9.3",
     "firebase": "^9.9.2",
@@ -40,12 +39,10 @@
     ]
   },
   "devDependencies": {
-    "@types/google-map-react": "^2.1.7",
     "@types/google.maps": "^3.49.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/d3": "^7.4.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.11.47",
     "@types/react": "^18.0.15",
