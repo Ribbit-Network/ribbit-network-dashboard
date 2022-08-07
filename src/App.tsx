@@ -1,19 +1,9 @@
 import React from "react";
 import "./App.css";
 
-import {
-  AppBar,
-  Box,
-  Button,
-  Container,
-  IconButton,
-  Menu,
-  SvgIcon,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import {AppBar, Button, IconButton, Toolbar, Typography} from "@mui/material";
 import frog from "./frog.svg";
-import { MyMapComponent } from "./components/Map";
+import MyMapComponent from "./components/Map";
 
 function App() {
   return (
