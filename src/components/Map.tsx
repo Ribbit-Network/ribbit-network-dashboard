@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { InfluxDB } from "@influxdata/influxdb-client-browser";
-import { Info } from "@mui/icons-material";
+import core from "../core/core";
 
 export function MyMapComponent() {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -9,12 +9,6 @@ export function MyMapComponent() {
   const [heatmapLayerRows, setHeatmapLayerRows] = React.useState<any[]>([]);
 
   useEffect(() => {
-    const influxDB = new InfluxDB({
-      url: "https://us-west-2-1.aws.cloud2.influxdata.com",
-      token:
-        "wQdQ6Xeh0jvjy_oCHnqYtux9qNaoEdt57B4mQiFz6gV-itMn2WnuLnolwAVfFuE6c6dR27m6bUxdqSxb9f5Rog==",
-    }).getQueryApi("keenan.johnson@gmail.com");
-
     const mapQuery =
       'from(bucket:"co2")' +
       "|> range(start:-30d)" +
@@ -29,8 +23,11 @@ export function MyMapComponent() {
       center: { lat: 37.775, lng: -122.434 },
       mapTypeId: "satellite",
     });
+    setMap(mapInstance);
 
-    influxDB.queryRows(mapQuery, {
+    if (heatmapLayerRows.length) return;
+
+    core.influxDB.queryRows(mapQuery, {
       next: (raw: any, tableMeta: any) => {
         const row: {
           co2: number;
@@ -74,7 +71,6 @@ export function MyMapComponent() {
       },
       error: console.error,
       complete: () => {
-        console.log("creating a heatmap now...");
         new window.google.maps.visualization.HeatmapLayer({
           data: heatmapLayerRows,
           map: mapInstance,

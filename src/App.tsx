@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import frog from "./frog.svg";
-import { MyMapComponent } from "./Map";
+import { MyMapComponent } from "./components/Map";
 
 function App() {
   return (
