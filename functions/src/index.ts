@@ -5,10 +5,12 @@ import core, { SensorData } from "./core";
 // // https://firebase.google.com/docs/functions/typescript
 
 export const heartbeat = functions.https.onRequest((request, response) => {
-  response.send("Hello from ribbit frog!");
+  response.send("Hello from ribbit the frog!");
 });
 
 export const getSensorData = functions.https.onRequest((request, response) => {
+  response.set("Access-Control-Allow-Origin", "*");
+
   const mapQuery =
     'from(bucket:"co2")' +
     "|> range(start:-30d)" +

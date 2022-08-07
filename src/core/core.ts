@@ -38,30 +38,12 @@ class Core {
     this.getMap();
   }
 
-  getMap() {
-    const mapQuery =
-      'from(bucket:"co2")' +
-      "|> range(start:-30d)" +
-      '|> filter(fn: (r) => r._field == "co2" or r._field == "lat" or r._field == "lon")' +
-      "|> last()" +
-      '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")' +
-      "|> filter(fn: (r) => r.lat != 0 and r.lon != 0)" +
-      '|> keep(columns: ["_time", "host", "lat", "lon", "co2"])';
+  async getMap() {
+    const response = await fetch('http://localhost:5001/ribbit-network/us-central1/getSensorData')
 
-    const response: SensorData[] = [];
+    this.sensorData = await response.json()
 
-    this.influxDB.queryRows(mapQuery, {
-      next: (raw: any, tableMeta: any) => {
-        const row: SensorData = tableMeta.toObject(raw);
-
-        response.push(row);
-      },
-      error: console.error,
-      complete: () => {
-        this.sensorData = response;
-        console.log("done reading db");
-      },
-    });
+    console.log("done reading db",  this.sensorData);
   }
 }
 
