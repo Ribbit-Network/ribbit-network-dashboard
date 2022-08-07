@@ -17,7 +17,7 @@ export function MyMapComponent() {
         "|> last()" +
         '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")' +
         "|> filter(fn: (r) => r.lat != 0 and r.lon != 0)" +
-      '|> keep(columns: ["_time", "host", "lat", "lon", "co2"])';
+        '|> keep(columns: ["_time", "host", "lat", "lon", "co2"])';
 
     const mapInstance = new window.google.maps.Map(ref.current!, {
       zoom: 3,
