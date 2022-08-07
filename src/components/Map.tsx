@@ -1,7 +1,7 @@
-import React, {useEffect} from "react";
-import {Box} from "@mui/material";
+import React, { useEffect } from "react";
+import { Box } from "@mui/material";
 import core from "../core/core";
-import {observer} from "mobx-react";
+import { observer } from "mobx-react";
 
 export default observer(() => {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -13,7 +13,7 @@ export default observer(() => {
 
     const mapInstance = new window.google.maps.Map(ref.current!, {
       zoom: 3,
-      center: {lat: 37.775, lng: -122.434},
+      center: { lat: 37.775, lng: -122.434 },
       mapTypeId: "satellite",
     });
 
@@ -23,8 +23,8 @@ export default observer(() => {
         content: `
         <div>
               <Typography><strong>${row.co2.toFixed(
-            0
-        )}</strong> kg CO2 emitted</Typography>
+                0
+              )}</strong> kg CO2 emitted</Typography>
               <br/>
               <Typography>${new Date(row._time).toDateString()}</Typography>
             </div>`,
@@ -58,13 +58,13 @@ export default observer(() => {
   }, [core.sensorData]);
 
   return (
-      <Box
-          sx={{
-            height: "100vh",
-            width: "100vw",
-          }}
-          ref={ref}
-          id="map"
-      />
+    <Box
+      sx={{
+        height: "100vh",
+        width: "100vw",
+      }}
+      ref={ref}
+      id="map"
+    />
   );
 });
