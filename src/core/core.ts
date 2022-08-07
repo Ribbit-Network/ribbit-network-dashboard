@@ -24,13 +24,11 @@ class Core {
 
     makeAutoObservable(this);
 
-    console.log("firebase initialized");
-
     this.getMap();
   }
 
   async getMap() {
-    const response = await fetch('http://localhost:5001/ribbit-network/us-central1/getSensorData')
+    const response = await fetch('https://us-central1-ribbit-network.cloudfunctions.net/getSensorData')
 
     this.sensorData = await response.json()
   }

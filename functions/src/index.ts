@@ -1,13 +1,6 @@
 import * as functions from "firebase-functions";
 import core, { SensorData } from "./core";
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-
-export const heartbeat = functions.https.onRequest((request, response) => {
-  response.send("Hello from ribbit the frog!");
-});
-
 export const getSensorData = functions.https.onRequest((request, response) => {
   response.set("Access-Control-Allow-Origin", "*");
 

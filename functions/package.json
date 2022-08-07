@@ -25,5 +25,5 @@
     "tsc-silent": "^1.2.1"
   },
   "private": true,
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
