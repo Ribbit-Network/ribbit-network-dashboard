@@ -1,4 +1,5 @@
 import * as functions from "firebase-functions";
+import core, { SensorData } from "./core";
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
@@ -8,6 +9,30 @@ export const heartbeat = functions.https.onRequest((request, response) => {
 });
 
 export const getSensorData = functions.https.onRequest((request, response) => {
-  functions.logger.info("Hello logs!", { structuredData: true });
-  response.send("Hello from Firebase!");
+  const mapQuery =
+    'from(bucket:"co2")' +
+    "|> range(start:-30d)" +
+    '|> filter(fn: (r) => r._field == "co2" or r._field == "lat" or r._field == "lon")' +
+    "|> last()" +
+    '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")' +
+    "|> filter(fn: (r) => r.lat != 0 and r.lon != 0)" +
+    '|> keep(columns: ["_time", "host", "lat", "lon", "co2"])';
+
+  const data: SensorData[] = [];
+
+  core.influxDB.queryRows(mapQuery, {
+    next: (raw: any, tableMeta: any) => {
+      const row: SensorData = tableMeta.toObject(raw);
+
+      data.push(row);
+    },
+    error: (e: Error) => {
+      functions.logger.error(e, { structuredData: true });
+
+      response.send("something went wrong!");
+    },
+    complete: () => {
+      response.json(data);
+    },
+  });
 });
