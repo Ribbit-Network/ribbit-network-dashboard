@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 
-import {AppBar, Button, IconButton, Toolbar, Typography} from "@mui/material";
+import { AppBar, Button, IconButton, Toolbar, Typography } from "@mui/material";
 import frog from "./frog.svg";
 import MyMapComponent from "./components/Map";
 
