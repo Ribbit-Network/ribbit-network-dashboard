@@ -132,11 +132,11 @@ dmypy.json
 .DS_Store
 
 ### VisualStudioCode ###
-.vscode/*      # Maybe .vscode/**/* instead - see comments
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+oldcode/.vscode/*      # Maybe .vscode/**/* instead - see comments
+!oldcode/.vscode/settings.json
+!oldcode/.vscode/tasks.json
+!oldcode/.vscode/launch.json
+!oldcode/.vscode/extensions.json
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
@@ -144,3 +144,27 @@ dmypy.json
 
 # Pycharm
 .idea
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+**.cache

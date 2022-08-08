@@ -1,0 +1,28 @@
+{
+  "name": "functions",
+  "scripts": {
+    "start": "npm run compile & firebase emulators:start --only functions",
+    "dev": "npm run compile & node lib/index.js",
+    "compile": "tsc-silent --watch --project tsconfig.json --noImplicitAny --stats",
+    "build": "tsc-silent --project tsconfig.json --stats",
+    "deploy": "npm version patch && firebase deploy --only functions"
+  },
+  "engines": {
+    "node": "10"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "@influxdata/influxdb-client": "^1.28.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.14.1",
+    "mobx": "^6.6.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0",
+    "typescript": "^3.8.0",
+    "concurrently": "^6.5.1",
+    "tsc-silent": "^1.2.1"
+  },
+  "private": true,
+  "version": "0.0.4"
+}
