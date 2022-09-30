@@ -198,16 +198,16 @@ def update_graphs(sensor_data: list, sensor: Optional[str], _n_intervals) -> Uni
         return html.P('No data available for this sensor in the selected time range.')
 
     columns_to_plot = ['CO2 (PPM)', 'Temperature (degC)', 'Barometric Pressure (mBar)', 'Humidity (%)']
-    fig = make_subplots(rows=4, cols=1, shared_xaxes=True)
+    fig = make_subplots(rows=4, cols=1)
     for ind, col in enumerate(columns_to_plot):
-        fig.add_scatter(x=sensor_data["Time"], 
-                        y=sensor_data[col], 
-                        mode="lines", 
-                        line=go.scatter.Line(color="black"), 
-                        showlegend=False, 
-                        row=ind+1, 
-                        col=1, 
-                        hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>", 
+        fig.add_scatter(x=sensor_data["Time"],
+                        y=sensor_data[col],
+                        mode="lines",
+                        line=go.scatter.Line(color="black"),
+                        showlegend=False,
+                        row=ind+1,
+                        col=1,
+                        hovertemplate="Time: %{x}<br>%{text}: %{y:.2f}<extra></extra>",
                         text=[col]*len(sensor_data[col]))
         fig.update_yaxes(title_text=col, row=ind+1, col=1)
     fig.update_layout(template="plotly_white", height=1200)
