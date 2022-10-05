@@ -39,7 +39,8 @@ python3 -m pip install -r requirements.txt
 python3 app.py
 ```
 
-On Windows (If using Git Bash)
+In the case you may have recently installed or upgraded python, you might run the app but encounter a local issuer certificate error.  If you do encounter this, run the Install Certificates.command file in your Python folder (see [this issue](https://github.com/Ribbit-Network/ribbit-network-dashboard/issues/98) for more details).
+
 ```
 python3 -m venv env
 env/Scripts/activate
