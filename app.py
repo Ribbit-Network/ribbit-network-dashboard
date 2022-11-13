@@ -47,6 +47,8 @@ def serve_layout() -> html.Div:
                    style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
             html.A(html.H3('Support'), href='https://ko-fi.com/keenanjohnson',
                    style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
+			html.A(html.H3('FAQ'), href='https://www.notion.so/FAQ-Frog-sensor-edf42fd302a34430abedff4e1df3da45',
+                   style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
         ], id='nav'),
 
         html.Div([
