@@ -19,15 +19,14 @@ This repository contains the dashboard for that public information
 ## Current Status
 This dashboard is in it's very earliest version and needs a lot of work.
 
-The first prototype sensors are up and running in Seattle. [Here is the deployed version of this repo which shows the current live sensor data](https://ribbit-network.herokuapp.com/) (Note this dashboard is still experimental and may be down occasionally).
+The first prototype sensors are up and running in Seattle. [Here is the deployed version of this repo which shows the current live sensor data](https://dashboard.ribbitnetwork.org/) (Note this dashboard is still experimental and may be down occasionally).
 
 ## Technical Details
-
 ![Block Diagram](block_diagram.drawio.svg)
 
 The application is built as a [Dash app](https://plotly.com/dash/).
 
-It is currently automatically deployed on [Heroku](https://dashboard.heroku.com/) from this repository.
+It is currently automatically deployed on [platform.sh](https://platform.sh/) from this repository.
 
 You can run the website locally on your development machine using the following instructions after cloning this repo:
 
