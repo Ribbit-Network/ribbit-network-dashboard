@@ -20,30 +20,11 @@ hooks:
         export FLASK_APP=server.py
         # Setup pip.
         python -m pip install pip==$PIP_VERSION
-        ############### PIPENV ###################
-        if [ "$PACKAGE_MANAGER" = "pipenv" ]; then
-            # Install pipenv.
-            pip install pipenv==$PIPENV_VERSION_BUILD
-            # Check and verify the lockfile. Track failures.
-            pipenv check && pipenv verify && pipenv --support > pipenv.support
-            # Install dependencies to the virtual environment.
-            VENV_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
-            pipenv --python $VENV_VERSION
-            pipenv install --deploy
-        ############### POETRY ###################
-        elif [ "$PACKAGE_MANAGER" = "poetry" ]; then
-            # Install Poetry.
-            POETRY_INSTALLER='https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py'
-            curl -sSL $POETRY_INSTALLER | POETRY_VERSION=$POETRY_VERSION python -
-            # Check lockfile and install dependencies.
-            poetry env use system
-            poetry check
-            poetry install
-        fi
+        python -m pip install -r requirements.txt
 web:
     # Commands are run once after deployment to start the application process.
     commands:
-        start: blackfire-python flask run -p $PORT
+        start: blackfire-python app.py
 
 # The size of the persistent disk of the application (in MB).
 disk: 1024
