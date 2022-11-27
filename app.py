@@ -22,6 +22,9 @@ colorscale = ['lightgreen', 'green', 'darkgreen', 'black']
 
 map_js = Namespace('ribbit', 'map')
 
+# Hard coded for the lab testing purposes
+sensor_id = '0d3ae07ab4d7a89098b33c0622e2ac57'
+
 # Dash App
 app = dash.Dash(__name__, title=TITLE, update_title=None, external_scripts=[chroma])
 server = app.server
@@ -31,7 +34,7 @@ def serve_layout() -> html.Div:
     return html.Div([
         html.Div(id='onload', hidden=True),
         dcc.Interval(id='interval', interval=REFRESH_MS, n_intervals=0),
-        dcc.Store(id='selected-sensor', storage_type='local', data=None),
+        dcc.Store(id='selected-sensor', storage_type='local', data='0d3ae07ab4d7a89098b33c0622e2ac57'),
         dcc.Store(id='sensor-data', storage_type='local', data=[]),
 
         html.Div([
@@ -50,23 +53,6 @@ def serve_layout() -> html.Div:
 			html.A(html.H3('FAQ'), href='https://www.notion.so/FAQ-Frog-sensor-edf42fd302a34430abedff4e1df3da45',
                    style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
         ], id='nav'),
-
-        html.Div([
-            dl.Map(
-                [
-                    dl.TileLayer(url='https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
-                                 attribution='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'),
-                    dl.LocateControl(startDirectly=True, options=dict(keepCurrentZoomLevel=True, drawCircle=False, drawMarker=False)),
-                    dl.LayerGroup(id='marker-layer', children=[dl.GeoJSON(id="geojson")]),
-                    dl.Colorbar(colorscale=colorscale, width=20, height=200, min=300, max=600, unit='PPM'),
-                    dl.GestureHandling(),
-                ],
-                id='map',
-                zoom=3,
-                minZoom=3,
-                maxBounds=[[-75, -180],[75, 200]],
-            ),
-        ], id='map-container'),
         html.Div([
 			html.Label(['Duration'], id='durationLabel'),
             dcc.Dropdown(id='duration', clearable=False, searchable=False, value='7d', options=[
@@ -114,47 +100,6 @@ app.clientside_callback(
 )
 
 
-# Update the Map
-@app.callback(
-    Output('marker-layer', 'children'),
-    [
-        Input('onload', 'children'),
-        Input('interval', 'n_intervals'),
-        Input('selected-sensor', 'data'),
-    ],
-)
-def update_map(_children, _n_intervals, selected_sensor: Optional[str]) -> dl.GeoJSON:
-    df = db.get_map_data()
-    df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM<br />' + df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S').astype(str)
-
-    return dl.GeoJSON(
-        id='geojson',
-        data=dlx.dicts_to_geojson(df.to_dict('records')),
-        options=dict(pointToLayer=map_js('pointToLayer')),
-        cluster=True,
-        clusterToLayer=map_js('clusterToLayer'),
-        zoomToBoundsOnClick=True,
-        superClusterOptions=dict(radius=100),
-        hideout=dict(colorProp='co2', circleOptions=dict(radius=12), min=300, max=600,
-                     colorscale=colorscale, selectedSensor=selected_sensor),
-    )
-
-
-@app.callback(
-    Output('selected-sensor', 'data'),
-    [
-        Input('geojson', 'click_feature'),
-        Input('selected-sensor', 'data')
-    ]
-)
-def handle_click(click_feature: dict, old_data: Optional[str]) -> Optional[str]:
-    if click_feature is None:
-        return old_data
-    try:
-        return click_feature['properties']['host']
-    except KeyError:
-        return old_data
-
 
 @app.callback(
     Output('sensor-data', 'data'),
@@ -168,12 +113,13 @@ def handle_click(click_feature: dict, old_data: Optional[str]) -> Optional[str]:
 def fetch_sensor_data(sensor: str, timezone: str, duration: str, frequency: str):
     if sensor is None:
         return None
-    sensor_data = db.get_sensor_data(sensor, duration, frequency)
+    sensor_data = db.get_sensor_data(sensor_id, duration, frequency)
+
+    print("sensor",  sensor_data)
 
     if not sensor_data.empty:
         sensor_data.rename(
-            columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'lat': 'Latitude', 'lon': 'Longitude',
-                        'alt': 'Altitude (m)', 'temperature': 'Temperature (degC)',
+            columns={'_time': 'Time', 'co2': 'CO2 (PPM)', 'humidity': 'Humidity (%)', 'temperature': 'Temperature (degC)',
                         'baro_pressure': 'Barometric Pressure (mBar)'}, inplace=True)
         sensor_data['Time'] = sensor_data['Time'].dt.tz_convert(timezone)
 
