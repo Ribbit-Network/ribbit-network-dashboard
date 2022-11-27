@@ -1,0 +1,30 @@
+# The name of this app. Must be unique within a project.
+name: flask
+
+# The runtime the application uses.
+type: "python:3.9"
+
+variables:
+    env:
+        PACKAGE_MANAGER: poetry
+        PIP_VERSION: 22.0.4
+        PIPENV_VERSION_BUILD: 2022.4.21
+        POETRY_VERSION: 1.1.13
+        POETRY_VIRTUALENVS_IN_PROJECT: true
+        POETRY_VIRTUALENVS_CREATE: false
+
+hooks:
+    build: |
+        set -e
+        # export Flask app for Blackfire
+        export FLASK_APP=server.py
+        # Setup pip.
+        python -m pip install pip==$PIP_VERSION
+        python -m pip install -r requirements.txt
+web:
+    # Commands are run once after deployment to start the application process.
+    commands:
+        start: python app.py
+
+# The size of the persistent disk of the application (in MB).
+disk: 1024
