@@ -14,7 +14,7 @@ import dash_leaflet.express as dlx
 
 import db
 
-TITLE = 'Ribbit Network'
+TITLE = 'Ribbit Network - Lab Testing Lawrence Berkeley National Lab'
 REFRESH_MS = 60 * 1000
 
 chroma = 'https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js'
@@ -55,7 +55,7 @@ def serve_layout() -> html.Div:
         ], id='nav'),
         html.Div([
 			html.Label(['Duration'], id='durationLabel'),
-            dcc.Dropdown(id='duration', clearable=False, searchable=False, value='7d', options=[
+            dcc.Dropdown(id='duration', clearable=False, searchable=False, value='1h', options=[
                 {'label': '10 minutes', 'value': '10m'},
                 {'label': '30 minutes', 'value': '30m'},
                 {'label': '1 hour', 'value': '1h'},
@@ -64,7 +64,8 @@ def serve_layout() -> html.Div:
                 {'label': '30 days', 'value': '30d'},
             ]),
 			html.Label(['Sampling'], id='frequencyLabel'),
-			dcc.Dropdown(id='frequency', clearable=False, searchable=False, value='1h', options=[
+			dcc.Dropdown(id='frequency', clearable=False, searchable=False, value='2sec', options=[
+                {'label': '2 second sample', 'value': '2sec'},
                 {'label': '1 minute sample', 'value': '1min'},
                 {'label': '5 minute average', 'value': '5min'},
 				{'label': '15 minute  average', 'value': '15min'},
@@ -114,8 +115,6 @@ def fetch_sensor_data(sensor: str, timezone: str, duration: str, frequency: str)
     if sensor is None:
         return None
     sensor_data = db.get_sensor_data(sensor_id, duration, frequency)
-
-    print("sensor",  sensor_data)
 
     if not sensor_data.empty:
         sensor_data.rename(
