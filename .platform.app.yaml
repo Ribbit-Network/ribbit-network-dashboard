@@ -1,0 +1,49 @@
+# The name of this app. Must be unique within a project.
+name: flask
+
+# The runtime the application uses.
+type: "python:3.9"
+
+variables:
+    env:
+        PACKAGE_MANAGER: poetry
+        PIP_VERSION: 22.0.4
+        PIPENV_VERSION_BUILD: 2022.4.21
+        POETRY_VERSION: 1.1.13
+        POETRY_VIRTUALENVS_IN_PROJECT: true
+        POETRY_VIRTUALENVS_CREATE: false
+
+hooks:
+    build: |
+        set -e
+        # export Flask app for Blackfire
+        export FLASK_APP=server.py
+        # Setup pip.
+        python -m pip install pip==$PIP_VERSION
+        ############### PIPENV ###################
+        if [ "$PACKAGE_MANAGER" = "pipenv" ]; then
+            # Install pipenv.
+            pip install pipenv==$PIPENV_VERSION_BUILD
+            # Check and verify the lockfile. Track failures.
+            pipenv check && pipenv verify && pipenv --support > pipenv.support
+            # Install dependencies to the virtual environment.
+            VENV_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
+            pipenv --python $VENV_VERSION
+            pipenv install --deploy
+        ############### POETRY ###################
+        elif [ "$PACKAGE_MANAGER" = "poetry" ]; then
+            # Install Poetry.
+            POETRY_INSTALLER='https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py'
+            curl -sSL $POETRY_INSTALLER | POETRY_VERSION=$POETRY_VERSION python -
+            # Check lockfile and install dependencies.
+            poetry env use system
+            poetry check
+            poetry install
+        fi
+web:
+    # Commands are run once after deployment to start the application process.
+    commands:
+        start: blackfire-python flask run -p $PORT
+
+# The size of the persistent disk of the application (in MB).
+disk: 1024
