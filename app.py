@@ -36,18 +36,18 @@ def serve_layout() -> html.Div:
 
         html.Div([
             html.Img(src='assets/frog.svg'),
-            html.H1(TITLE),
-            html.A(html.H3('Learn'), href='https://ribbitnetwork.org/',
-                   style={'marginLeft': 'auto', 'textDecoration': 'underline', 'color': 'black'}),
+            html.A(html.H1(TITLE),
+                   href='https://ribbitnetwork.org/',
+                   style={'textDecoration': 'none', 'color': 'black'}),
             html.A(html.H3('Build'),
                    href='https://github.com/Ribbit-Network/ribbit-network-frog-sensor#build-a-frog',
-                   style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
+                   style={'marginLeft': 'auto', 'textDecoration': 'underline', 'color': 'black'}),
             html.A(html.H3('Order'),
                    href='https://ribbitnetwork.org/#buy',
                    style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
             html.A(html.H3('Support'), href='https://ko-fi.com/keenanjohnson',
                    style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
-			html.A(html.H3('FAQ'), href='https://www.notion.so/FAQ-Frog-sensor-edf42fd302a34430abedff4e1df3da45',
+            html.A(html.H3('FAQ'), href='https://www.notion.so/FAQ-Frog-sensor-edf42fd302a34430abedff4e1df3da45',
                    style={'marginLeft': '2em', 'textDecoration': 'underline', 'color': 'black'}),
         ], id='nav'),
 
@@ -68,7 +68,7 @@ def serve_layout() -> html.Div:
             ),
         ], id='map-container'),
         html.Div([
-			html.Label(['Duration'], id='durationLabel'),
+            html.Label(['Duration'], id='durationLabel'),
             dcc.Dropdown(id='duration', clearable=False, searchable=False, value='7d', options=[
                 {'label': '10 minutes', 'value': '10m'},
                 {'label': '30 minutes', 'value': '30m'},
@@ -77,12 +77,12 @@ def serve_layout() -> html.Div:
                 {'label': '7 days', 'value': '7d'},
                 {'label': '30 days', 'value': '30d'},
             ]),
-			html.Label(['Sampling'], id='frequencyLabel'),
-			dcc.Dropdown(id='frequency', clearable=False, searchable=False, value='1h', options=[
+            html.Label(['Sampling'], id='frequencyLabel'),
+            dcc.Dropdown(id='frequency', clearable=False, searchable=False, value='1h', options=[
                 {'label': '1 minute sample', 'value': '1min'},
                 {'label': '5 minute average', 'value': '5min'},
-				{'label': '15 minute  average', 'value': '15min'},
-				{'label': '30 minute average', 'value': '30min'},
+                {'label': '15 minute  average', 'value': '15min'},
+                {'label': '30 minute average', 'value': '30min'},
                 {'label': '1 hour average', 'value': '1h'},
             ]),
             html.Div([
@@ -93,13 +93,16 @@ def serve_layout() -> html.Div:
                 dcc.Download(id='download'),
             ]),
         ], id='controls'),
-
+        html.Div([
+               html.P('The real-time Ribbit Network observations displayed here, and available for download as comma-separated value (CSV) files, are raw data values that have not yet undergone any quality control. See further information in the FAQ.',
+            style={'width':'100%', 'text-align':'center', 'color': '#AAAAAA', 'font-size': '11px'}),
+           ], id='infoText'),
         html.Div([
             html.Div(id='timeseries'),
             html.Div(id='timezone', hidden=True),
         ], id='graphs'),
     ])
-
+    
 app.layout = serve_layout
 
 # Get browser timezone
@@ -162,7 +165,7 @@ def handle_click(click_feature: dict, old_data: Optional[str]) -> Optional[str]:
         Input('selected-sensor', 'data'),
         Input('timezone', 'children'),
         Input('duration', 'value'),
-		Input('frequency', 'value'),
+        Input('frequency', 'value'),
     ]
 )
 def fetch_sensor_data(sensor: str, timezone: str, duration: str, frequency: str):

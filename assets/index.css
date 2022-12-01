@@ -12,8 +12,8 @@ body {
     display: flex;
     height: 40px;
     padding: 16px 32px 16px 16px;
-	width: 70%;
-	margin: 0 auto;
+    width: 70%;
+    margin: 0 auto;
 }
 
 #nav img {
@@ -25,8 +25,8 @@ body {
     display: flex;
     height: 400px;
     justify-content: center;
-	width: 70%;
-	margin: 0 auto;
+    width: 70%;
+    margin: 0 auto;
 }
 
 #map-container #loading {
@@ -38,10 +38,10 @@ body {
     visibility: hidden;
 }
 
-#controls {
+#controls, #infoText {
     display: flex;
     margin: 16px;
-	width: 70%;
+    width: 70%;
     margin: 16px auto;
 }
 
@@ -57,9 +57,9 @@ body {
 
 
 #controls #durationLabel, #frequencyLabel {
-	margin-right: 8px;
+    margin-right: 8px;
     font-weight: bold;
-	text-align: center;
+    text-align: center;
 }
 
 #controls #export {
