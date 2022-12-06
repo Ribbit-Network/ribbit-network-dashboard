@@ -232,4 +232,4 @@ def export_data(n_clicks: Optional[int], sensor_data: list) -> dict:
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
