@@ -30,7 +30,7 @@ def get_sensor_data(host: str, duration: str, frequency: str) -> pd.DataFrame:
                                     f'|> filter(fn: (r) => r.host == "{host}")'
                                     '|> aggregateWindow(every: 1m, fn: mean, createEmpty: false)'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
-                                    '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "alt", "_time", "baro_pressure"])')
+                                    '|> keep(columns: ["co2", "temperature", "humidity", "lat", "lon", "_time", "baro_pressure"])')
     if df.empty:
         return df
     df.drop(['result', 'table'], axis=1, inplace=True)
