@@ -17,7 +17,7 @@ The Ribbit Network saves the sensor data and makes it accessible for scientists 
 
 This repository contains the dashboard for that public information
 
-![image](https://user-images.githubusercontent.com/2559382/128451521-2e97bbf5-b5f7-4663-b070-af488d3d1f65.png)
+![image](images/frog_map.png)
 
 ## Current Status
 This dashboard is in it's very earliest version and needs a lot of work.
