@@ -71,7 +71,7 @@ The [contributing guide](CONTRIBUTING.md) outlines the process for helping out!
 [Check out the Frequently Asked Questions section.](https://github.com/Ribbit-Network/ribbit-network-faq) If you don't see your question, let us know either in a Github Discussion or via Discord.
 
 ## Background Information
-[See the Wiki for background research.](https://github.com/Ribbit-Network/ribbit-network-sensor/wiki/Background-Research) This project is inspired by some awesome research by incedible scientists in academia.
+[See the background research here.](https://ribbitnetwork.notion.site/Lessons-from-other-projects-9bd760f5a2cc4d19be32682e11f4ab11) This project is inspired by some awesome research by incedible scientists in academia.
 
 ## Support
 Ribbit Network is a non-profit (501c3) creating the world's largest Greenhouse Gas Emissions dataset that will empower anyone to join in the work on climate and provide informed data for climate action. We're an all volunteer team building everything we do in the open-source community.
