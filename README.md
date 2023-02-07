@@ -22,7 +22,7 @@ This repository contains the dashboard for that public information
 ## Current Status
 This dashboard is in it's very earliest version and needs a lot of work.
 
-The first prototype sensors are up and running in Seattle. [Here is the deployed version of this repo which shows the current live sensor data](https://dashboard.ribbitnetwork.org/) (Note this dashboard is still experimental and may be down occasionally).
+[Here is the deployed version of this repo which shows the current live sensor data](https://dashboard.ribbitnetwork.org/) (Note this dashboard is still experimental and may be down occasionally).
 
 ## Technical Details
 ![Block Diagram](block_diagram.drawio.svg)
