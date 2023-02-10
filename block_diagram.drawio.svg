@@ -62,7 +62,7 @@
         <path d="M 460 23 L 610 23" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="rgb(0, 0, 0)" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="12px">
             <text x="534.5" y="16">
-                Heroku
+                platform.sh
             </text>
         </g>
         <ellipse cx="535" cy="95" rx="40" ry="40" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
