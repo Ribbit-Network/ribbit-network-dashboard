@@ -166,6 +166,7 @@ def handle_click(click_feature: dict, old_data: Optional[str]) -> Optional[str]:
     ]
 )
 def fetch_sensor_data(sensor: str, timezone: str, duration: str, frequency: str):
+    print('fetching sensor data')
     if sensor is None:
         return None
     sensor_data = db.get_sensor_data(sensor, duration, frequency)
