@@ -25,7 +25,7 @@ This dashboard is in it's very earliest version and needs a lot of work.
 [Here is the deployed version of this repo which shows the current live sensor data](https://dashboard.ribbitnetwork.org/) (Note this dashboard is still experimental and may be down occasionally).
 
 ## Technical Details
-![Block Diagram](block_diagram.drawio.svg)
+![Block Diagram](images/block_diagram.drawio.svg)
 
 The application is built as a [Dash app](https://plotly.com/dash/).
 
