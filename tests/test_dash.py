@@ -1,4 +1,4 @@
-from app import app
+from src.app import app
 
 
 def test_dash001_smoke(dash_duo):

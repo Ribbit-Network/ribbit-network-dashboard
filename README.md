@@ -38,7 +38,7 @@ On mac/linux
 python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
-python3 app.py
+python3 src/app.py
 ```
 
 In the case you may have recently installed or upgraded python, you might run the app but encounter a local issuer certificate error.  If you do encounter this, run the Install Certificates.command file in your Python folder (see [this issue](https://github.com/Ribbit-Network/ribbit-network-dashboard/issues/98) for more details).
@@ -47,7 +47,7 @@ In the case you may have recently installed or upgraded python, you might run th
 python3 -m venv env
 env/Scripts/activate
 python3 -m pip install -r requirements.txt
-python3 app.py
+python3 src/app.py
 ```
 
 On Windows (If using Command Prompt)
@@ -55,7 +55,7 @@ On Windows (If using Command Prompt)
 python3 -m venv env
 env\Scripts\activate
 python3 -m pip install -r requirements.txt
-python3 app.py
+python3 src\app.py
 ```
 
 Once the server is up and running you can visit it locally by going to http://127.0.0.1:8050/

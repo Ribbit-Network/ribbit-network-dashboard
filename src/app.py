@@ -35,7 +35,7 @@ def serve_layout() -> html.Div:
         dcc.Store(id='sensor-data', storage_type='local', data=[]),
 
         html.Div([
-            html.Img(src='assets/frog.svg'),
+            html.Img(src='../assets/frog.svg'),
             html.A(html.H1(TITLE),
                    href='https://ribbitnetwork.org/',
                    style={'textDecoration': 'none', 'color': 'black'}),
@@ -84,7 +84,7 @@ def serve_layout() -> html.Div:
             ]),
             html.Div([
                 html.Button(html.Div([
-                    html.Img(src='assets/download.svg'),
+                    html.Img(src='../assets/download.svg'),
                     'Export as CSV',
                 ]), id='export'),
                 dcc.Download(id='download'),
