@@ -12,7 +12,7 @@ from dash_extensions.javascript import Namespace
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 
-import db
+import src.db as db
 
 TITLE = 'Ribbit Network'
 REFRESH_MS = 60 * 1000
@@ -124,6 +124,7 @@ app.clientside_callback(
     ],
 )
 def update_map(_children, _n_intervals, selected_sensor: Optional[str]) -> dl.GeoJSON:
+    print('update_map')
     df = db.get_map_data()
     df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM<br />' + df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S').astype(str)
 
@@ -233,4 +234,5 @@ def export_data(n_clicks: Optional[int], sensor_data: list) -> dict:
 
 
 if __name__ == '__main__':
+    print('starting app server')
     app.run_server(debug=False)
