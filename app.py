@@ -12,7 +12,7 @@ from dash_extensions.javascript import Namespace
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 
-import src.db as db
+import db
 
 TITLE = 'Ribbit Network'
 REFRESH_MS = 60 * 1000
@@ -35,7 +35,7 @@ def serve_layout() -> html.Div:
         dcc.Store(id='sensor-data', storage_type='local', data=[]),
 
         html.Div([
-            html.Img(src='../assets/frog.svg'),
+            html.Img(src='assets/frog.svg'),
             html.A(html.H1(TITLE),
                    href='https://ribbitnetwork.org/',
                    style={'textDecoration': 'none', 'color': 'black'}),
@@ -84,7 +84,7 @@ def serve_layout() -> html.Div:
             ]),
             html.Div([
                 html.Button(html.Div([
-                    html.Img(src='../assets/download.svg'),
+                    html.Img(src='assets/download.svg'),
                     'Export as CSV',
                 ]), id='export'),
                 dcc.Download(id='download'),
