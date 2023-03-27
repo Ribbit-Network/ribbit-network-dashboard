@@ -124,7 +124,6 @@ app.clientside_callback(
     ],
 )
 def update_map(_children, _n_intervals, selected_sensor: Optional[str]) -> dl.GeoJSON:
-    print('update_map')
     df = db.get_map_data()
     df['tooltip'] = df['co2'].round(decimals=2).astype(str) + ' PPM<br />' + df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S').astype(str)
 
@@ -167,7 +166,6 @@ def handle_click(click_feature: dict, old_data: Optional[str]) -> Optional[str]:
     ]
 )
 def fetch_sensor_data(sensor: str, timezone: str, duration: str, frequency: str):
-    print('fetching sensor data')
     if sensor is None:
         return None
     sensor_data = db.get_sensor_data(sensor, duration, frequency)
@@ -234,5 +232,4 @@ def export_data(n_clicks: Optional[int], sensor_data: list) -> dict:
 
 
 if __name__ == '__main__':
-    print('starting app server')
     app.run_server(debug=False)

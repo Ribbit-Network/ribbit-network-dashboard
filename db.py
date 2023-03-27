@@ -9,10 +9,6 @@ import influxdb_client
 INFLUXDB_BUCKET = "co2"
 INFLUXDB_ORG = "keenan.johnson@gmail.com"
 INFLUXDB_URL = "https://us-west-2-1.aws.cloud2.influxdata.com/"
-
-for name, value in os.environ.items():
-    print("{0}: {1}".format(name, value))
-
 INFLUXDB_TOKEN = os.environ['INFLUXDB_TOKEN']
 
 client = influxdb_client.InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
