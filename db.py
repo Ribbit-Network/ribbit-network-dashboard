@@ -6,8 +6,8 @@ from cachetools import cached, TTLCache
 
 import influxdb_client
 
-INFLUXDB_BUCKET = "co2"
-INFLUXDB_ORG = "keenan.johnson@gmail.com"
+INFLUXDB_BUCKET = "frog_fleet"
+INFLUXDB_ORG = "Ribbit Network"
 INFLUXDB_URL = "https://us-west-2-1.aws.cloud2.influxdata.com/"
 INFLUXDB_TOKEN = os.environ['INFLUXDB_TOKEN']
 
@@ -64,7 +64,7 @@ def print_sensor_info():
     result = result.sort_values(by=['days_since_last_read'], ascending=[True])[['host', 'co2', 'version', 'days_since_last_read']]
     print(result)
 
-
+# python3 ./db.py
 if __name__ == '__main__':
     # https://stackoverflow.com/questions/52805115/certificate-verify-failed-unable-to-get-local-issuer-certificate
     pd.set_option('display.max_columns', None)
