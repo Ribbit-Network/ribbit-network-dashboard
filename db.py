@@ -25,7 +25,7 @@ def get_map_data() -> pd.DataFrame:
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
                                     '|> map(fn: (r) => ({r with co2: float(v: r.co2)}))'
                                     '|> keep(columns: ["_time", "host", "lat", "lon", "co2"])')
-    return  concat_result(df)
+    return concat_result(df)
 
 
 
@@ -72,7 +72,7 @@ def concat_result(df):
         #     print(x[['_measurement', 'co2', 'host']])
         return pd.concat(df)
     if type(df) is pd.DataFrame:
-        return dfs
+        return df
 
 # python3 ./db.py
 if __name__ == '__main__':
@@ -80,8 +80,8 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', 1000)
 
-    #df = print_sensor_info()
-    #print(df)
+    df = print_sensor_info()
+    print(df)
 
     #df = get_map_data()
     #print(df)
