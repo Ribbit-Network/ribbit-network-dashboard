@@ -20,14 +20,13 @@ def get_map_data() -> pd.DataFrame:
     df = query_api.query_data_frame(f'from(bucket:"{INFLUXDB_BUCKET}")'
                                     '|> range(start:-30d)'
                                     '|> filter(fn: (r) => r._field == "co2" or r._field == "lat" or r._field == "lon")'
+                                    '|> filter(fn: (r) => r.lat != 0 and r.lon != 0)'
                                     '|> last()'
                                     '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
-                                    '|> filter(fn: (r) => r.lat != 0 and r.lon != 0)'
+                                    '|> map(fn: (r) => ({r with co2: float(v: r.co2)}))'
                                     '|> keep(columns: ["_time", "host", "lat", "lon", "co2"])')
-    if type(df) is list:
-        return pd.concat(df)
-    if type(df) is pd.DataFrame:
-        return df
+    return  concat_result(df)
+
 
 
 # `100` chosen arbitrarily, tweak with extreme prejudice
@@ -52,17 +51,28 @@ def print_sensor_info():
 
     influx_query = f'from(bucket:"{INFLUXDB_BUCKET}") \
     |> range(start:-30d) \
-    |> filter(fn:(r) => r._measurement == "ghg_point") \
     |> filter(fn:(r) => r._field == "co2") \
     |> last() \
     |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
 
-    result = query_api.query_data_frame(org=INFLUXDB_ORG, query=influx_query)[['_time', 'host', 'co2']]
+    result = query_api.query_data_frame(org=INFLUXDB_ORG, query=influx_query)
+    result = concat_result(result)
+
     result["days_since_last_read"] = ((datetime.now(timezone.utc) - result["_time"]).dt.total_seconds() / (60 * 60 * 24)).astype(int)
     result["version"] = np.where(result['host'].str.endswith('_golioth_esp32s3'), 'v4', 'v3')
     result["co2"] = result["co2"].astype(int)
     result = result.sort_values(by=['days_since_last_read'], ascending=[True])[['host', 'co2', 'version', 'days_since_last_read']]
-    print(result)
+
+    return result
+
+def concat_result(df):
+    if type(df) is list:
+        # for x in df:
+        #     print(x.dtypes)
+        #     print(x[['_measurement', 'co2', 'host']])
+        return pd.concat(df)
+    if type(df) is pd.DataFrame:
+        return dfs
 
 # python3 ./db.py
 if __name__ == '__main__':
@@ -70,4 +80,11 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', 1000)
 
-    print_sensor_info()
+    #df = print_sensor_info()
+    #print(df)
+
+    #df = get_map_data()
+    #print(df)
+
+    df = get_sensor_data('63b9deb6b679f5d522bda82a_golioth_esp32s3', '30d', '5min')
+    print(df)
