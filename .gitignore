@@ -1,3 +1,6 @@
+# Historical data files
+RibbitNetworkArchived/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
