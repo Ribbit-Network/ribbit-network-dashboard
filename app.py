@@ -95,6 +95,9 @@ def serve_layout() -> html.Div:
             style={'width':'100%', 'text-align':'center', 'color': '#AAAAAA', 'font-size': '11px'}),
            ], id='infoText'),
         html.Div([
+            html.P('Sensor ID: '),
+        ],
+        html.Div([
             html.Div(id='timeseries'),
             html.Div(id='timezone', hidden=True),
         ], id='graphs'),
