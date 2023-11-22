@@ -73,6 +73,7 @@ def serve_layout() -> html.Div:
                 {'label': '1 day', 'value': '24h'},
                 {'label': '7 days', 'value': '7d'},
                 {'label': '30 days', 'value': '30d'},
+                {'label': '3 Months', 'value': '90d'},
             ]),
             html.Label(['Sampling'], id='frequencyLabel'),
             dcc.Dropdown(id='frequency', clearable=False, searchable=False, value='1h', options=[
