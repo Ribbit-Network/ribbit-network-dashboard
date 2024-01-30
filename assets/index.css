@@ -3,7 +3,7 @@ body {
     margin: 0;
 }
 
-.modebar{
+.modebar {
     display: none !important;
 }
 
@@ -38,7 +38,8 @@ body {
     visibility: hidden;
 }
 
-#controls, #infoText {
+#controls,
+#infoText {
     display: flex;
     margin: 16px;
     width: 70%;
@@ -50,13 +51,15 @@ body {
     width: 160px;
 }
 
-#controls #duration, #frequency {
+#controls #duration,
+#frequency {
     margin-right: 8px;
     width: 160px;
 }
 
 
-#controls #durationLabel, #frequencyLabel {
+#controls #durationLabel,
+#frequencyLabel {
     margin-right: 8px;
     font-weight: bold;
     text-align: center;
@@ -79,11 +82,11 @@ body {
     vertical-align: middle;
 }
 
-[data-dash-is-loading='true']{
+[data-dash-is-loading='true'] {
     visibility: hidden;
 }
 
-[data-dash-is-loading='true']::before{
+[data-dash-is-loading='true']::before {
     content: url('spinner.gif');
     display: flex;
     justify-content: center;
@@ -93,4 +96,29 @@ body {
 #graphs {
     width: 70%;
     margin: 0 auto;
+}
+
+/* Added Pulsing Animation to Markers */
+@keyframes subtlePulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.008);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}
+
+.pulse-marker {
+    animation-name: subtlePulse;
+    animation-duration: 2s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
 }
