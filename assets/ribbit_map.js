@@ -4,11 +4,19 @@
   const STALE_OPACITY = 0.3;
   const NORMAL_OPACITY = 1;
 
+  // const HIGHLIGHT_CIRCLE = {
+  //   stroke: true,
+  //   color: "cyan",
+  //   weight: 10,
+  // };
+
   const HIGHLIGHT_CIRCLE = {
-    stroke: true,
-    color: "cyan",
-    weight: 10,
+    //Made Markers more distinct
+    fillColor: '#ff0000',
+    color: '#ffffff',
+    fillOpacity: 1,
   };
+
   const UNHIGHLIGHT_CIRCLE = {
     stroke: false,
   };
@@ -36,10 +44,19 @@
       Object.assign(extraOptions, UNHIGHLIGHT_CIRCLE);
     }
 
-    return L.circleMarker(latlng, {
+    const marker = L.circleMarker(latlng, {
       ...circleOptions,
       ...extraOptions,
     });
+    //Execute pulse animation on selected sensor
+    if (selectedSensor === feature.properties.host) {
+      // Add 'pulse-marker' class to the marker's DOM element
+      marker.on('add', function () {
+        const markerDom = marker.getElement();
+        markerDom.classList.add('pulse-marker');
+      });
+    }
+    return marker;
   }
 
   function clusterToLayer(feature, latlng, index, context) {
