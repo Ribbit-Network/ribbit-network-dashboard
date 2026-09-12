@@ -51,8 +51,9 @@ def serve_layout() -> html.Div:
         html.Div([
             dl.Map(
                 [
-                    dl.TileLayer(url='https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
-                                 attribution='Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'),
+                    dl.TileLayer(url='https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+                                 attribution='Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors, and the GIS user community',
+                                 maxNativeZoom=16),
                     dl.LocateControl(startDirectly=True, options=dict(keepCurrentZoomLevel=True, drawCircle=False, drawMarker=False)),
                     dl.LayerGroup(id='marker-layer', children=[dl.GeoJSON(id="geojson")]),
                     dl.Colorbar(colorscale=colorscale, width=20, height=200, min=300, max=600, unit='PPM'),
